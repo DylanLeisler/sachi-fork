@@ -97,7 +97,6 @@ namespace UI::MED {
         Gtk::Separator s1b{ };
         s1b.set_margin_end( MARGIN );
         sboxv1.append( s1b );
-        sboxv1.append( s1b );
 
         auto shbox2 = Gtk::CenterBox{ };
         shbox2.set_hexpand( true );

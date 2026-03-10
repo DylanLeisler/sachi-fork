@@ -1,23 +1,35 @@
+#include <algorithm>
 #include <cstring>
+
+#include <gdkmm/texture.h>
 
 #include "../../pure/util.h"
 #include "mapBankOverview.h"
 
 namespace UI::BOV {
-    constexpr u16 DOWN_SCALE = 8;
-
-    std::shared_ptr<Gtk::Image> mapBankOverview::createImage( const DATA::computedMapSlice& p_slice,
-                                                              u8 p_daytime ) {
-        auto btm = new DATA::bitmap( DATA::BLOCK_SIZE * DATA::SIZE / DOWN_SCALE,
-                                     DATA::BLOCK_SIZE * DATA::SIZE / DOWN_SCALE );
-        DATA::renderMapSlice( &p_slice, btm, 0, 0, DOWN_SCALE, p_daytime );
+    std::shared_ptr<Gtk::Picture>
+    mapBankOverview::createImage( const DATA::computedMapSlice& p_slice, u8 p_daytime,
+                                  u16 p_scale ) {
+        auto btm = new DATA::bitmap( PREVIEW_RENDER_SIZE, PREVIEW_RENDER_SIZE );
+        DATA::renderMapSlice( &p_slice, btm, 0, 0, PREVIEW_DOWN_SCALE, p_daytime );
 
         //    btm->writeToFile( ( "/tmp/" + std::to_string( cnt++ ) + ".png" ).c_str( ) );
 
         auto pixbuf = btm->pixbuf( );
+        if( pixbuf ) {
+            auto scaled = pixbuf->scale_simple( DISPLAY_SLICE_SIZE * p_scale,
+                                                DISPLAY_SLICE_SIZE * p_scale,
+                                                Gdk::InterpType::BILINEAR );
+            if( scaled ) { pixbuf = scaled; }
+        }
 
-        auto res = std::make_shared<Gtk::Image>( );
-        res->set( pixbuf );
+        auto res = std::make_shared<Gtk::Picture>( );
+        if( pixbuf ) {
+            auto texture = Gdk::Texture::create_for_pixbuf( pixbuf );
+            res->set_paintable( texture );
+        }
+        res->set_content_fit( Gtk::ContentFit::FILL );
+        res->set_can_shrink( true );
 
         delete btm;
         return res;
@@ -45,8 +57,8 @@ namespace UI::BOV {
         if( p_scale ) {
             _mapScale = p_scale;
 
-            _selectionBox.set_size_request( _mapScale * DATA::BLOCK_SIZE - 4,
-                                            _mapScale * DATA::BLOCK_SIZE - 4 );
+            _selectionBox.set_size_request( _mapScale * DISPLAY_SLICE_SIZE - 4,
+                                            _mapScale * DISPLAY_SLICE_SIZE - 4 );
         }
     }
 
@@ -71,9 +83,10 @@ namespace UI::BOV {
             auto& oim = _images[ imidx ];
             oim->unparent( );
 
-            auto im = createImage( p_map, _currentDaytime );
+            auto im = createImage( p_map, _currentDaytime, _mapScale );
 
-            im->set_size_request( DATA::BLOCK_SIZE, DATA::BLOCK_SIZE );
+            im->set_size_request( DISPLAY_SLICE_SIZE * _mapScale,
+                                  DISPLAY_SLICE_SIZE * _mapScale );
 
             oim = std::make_shared<Gtk::Overlay>( );
             oim->set_child( *im );
@@ -91,8 +104,9 @@ namespace UI::BOV {
 
         for( auto row : _mapBank ) {
             for( auto slice : row ) {
-                auto im = createImage( slice, _currentDaytime );
-                im->set_size_request( DATA::BLOCK_SIZE, DATA::BLOCK_SIZE );
+                auto im = createImage( slice, _currentDaytime, _mapScale );
+                im->set_size_request( DISPLAY_SLICE_SIZE * _mapScale,
+                                      DISPLAY_SLICE_SIZE * _mapScale );
 
                 auto overlay = std::make_shared<Gtk::Overlay>( );
                 overlay->set_child( *im );
@@ -112,7 +126,7 @@ namespace UI::BOV {
         p_minimumBaseline = -1;
         p_naturalBaseline = -1;
 
-        if( _mapBank.empty( ) ) {
+        if( _mapBank.empty( ) || _mapBank[ 0 ].empty( ) ) {
             p_minimum = 0;
             p_natural = 0;
             return;
@@ -120,15 +134,20 @@ namespace UI::BOV {
 
         auto slicesPerRow = _mapBank[ 0 ].size( );
         auto height       = _mapBank.size( );
+        constexpr int MAX_EXTENT = 8192;
 
         if( p_orientation == Gtk::Orientation::HORIZONTAL ) {
-            p_minimum
-                = slicesPerRow * _mapScale * DATA::BLOCK_SIZE + ( slicesPerRow - 1 ) * _mapSpacing;
-            p_natural
-                = slicesPerRow * _mapScale * DATA::BLOCK_SIZE + ( slicesPerRow - 1 ) * _mapSpacing;
+            auto req = int( slicesPerRow ) * int( _mapScale ) * int( DISPLAY_SLICE_SIZE )
+                       + ( int( slicesPerRow ) - 1 ) * int( _mapSpacing );
+            req       = std::clamp( req, 0, MAX_EXTENT );
+            p_minimum = req;
+            p_natural = req;
         } else {
-            p_minimum = height * _mapScale * DATA::BLOCK_SIZE + ( height - 1 ) * _mapSpacing;
-            p_natural = height * _mapScale * DATA::BLOCK_SIZE + ( height - 1 ) * _mapSpacing;
+            auto req = int( height ) * int( _mapScale ) * int( DISPLAY_SLICE_SIZE )
+                       + ( int( height ) - 1 ) * int( _mapSpacing );
+            req       = std::clamp( req, 0, MAX_EXTENT );
+            p_minimum = req;
+            p_natural = req;
         }
     }
 
@@ -150,15 +169,15 @@ namespace UI::BOV {
 
                 Gtk::Allocation allo;
 
-                u16 sx = x * _mapScale * DATA::BLOCK_SIZE;
-                u16 sy = y * _mapScale * DATA::BLOCK_SIZE;
+                u16 sx = x * _mapScale * DISPLAY_SLICE_SIZE;
+                u16 sy = y * _mapScale * DISPLAY_SLICE_SIZE;
                 sx += x * _mapSpacing;
                 sy += y * _mapSpacing;
 
                 allo.set_x( sx );
                 allo.set_y( sy );
-                auto width  = _mapScale * DATA::BLOCK_SIZE;
-                auto height = _mapScale * DATA::BLOCK_SIZE;
+                auto width  = _mapScale * DISPLAY_SLICE_SIZE;
+                auto height = _mapScale * DISPLAY_SLICE_SIZE;
                 allo.set_width( width );
                 allo.set_height( height );
                 im->size_allocate( allo, p_baseline );

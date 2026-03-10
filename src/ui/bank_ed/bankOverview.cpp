@@ -73,7 +73,12 @@ namespace UI {
         _mapBankOverview.setSpacing( _model.m_settings.m_bankOverviewSpacing );
         _mapBankOverview.queue_resize( );
 
-        if( _model.m_settings.m_overviewNeedsRedraw ) { render( ); }
+        if( _model.m_settings.m_overviewNeedsRedraw ) {
+            render( );
+        } else {
+            // Rebuild preview images so zoom changes affect image scale, not only layout spacing.
+            _mapBankOverview.redraw( _model.m_settings.m_bankOverviewDayTime );
+        }
 
         _mapBankOverview.selectMap( _model.selectedMapX( ), _model.selectedMapY( ) );
         _mapBankOverview.grab_focus( );

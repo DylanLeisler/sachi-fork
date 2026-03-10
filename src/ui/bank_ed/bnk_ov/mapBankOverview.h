@@ -4,9 +4,9 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/gestureclick.h>
-#include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
+#include <gtkmm/picture.h>
 #include <gtkmm/widget.h>
 
 #include "../../../data/maprender.h"
@@ -15,6 +15,11 @@
 namespace UI::BOV {
     class mapBankOverview : public Gtk::Widget {
       public:
+        static constexpr u16 PREVIEW_DOWN_SCALE = 8;
+        static constexpr u16 PREVIEW_RENDER_SIZE
+            = DATA::BLOCK_SIZE * DATA::SIZE / PREVIEW_DOWN_SCALE;
+        static constexpr u16 DISPLAY_SLICE_SIZE = DATA::BLOCK_SIZE;
+
         enum clickType {
             LEFT_DOUBLE   = GDK_BUTTON_PRIMARY,
             RIGHT_DOUBLE  = GDK_BUTTON_SECONDARY,
@@ -45,8 +50,8 @@ namespace UI::BOV {
 
             _selectionBox = Gtk::Box( );
             _selectionBox.get_style_context( )->add_class( "mapblock-selected" );
-            _selectionBox.set_size_request( _mapScale * DATA::BLOCK_SIZE - 4,
-                                            _mapScale * DATA::BLOCK_SIZE - 4 );
+            _selectionBox.set_size_request( _mapScale * DISPLAY_SLICE_SIZE - 4,
+                                            _mapScale * DISPLAY_SLICE_SIZE - 4 );
             _currentSelectionIndex = -1;
         }
         virtual ~mapBankOverview( );
@@ -90,8 +95,9 @@ namespace UI::BOV {
             selectMap( p_mapY * _mapBank[ 0 ].size( ) + p_mapX );
         }
 
-        static std::shared_ptr<Gtk::Image> createImage( const DATA::computedMapSlice& p_slice,
-                                                        u8                            p_daytime );
+        static std::shared_ptr<Gtk::Picture> createImage( const DATA::computedMapSlice& p_slice,
+                                                          u8                            p_daytime,
+                                                          u16 p_scale = 1 );
 
       protected:
         Gtk::SizeRequestMode get_request_mode_vfunc( ) const override;

@@ -27,7 +27,7 @@ namespace UI::MED {
         std::shared_ptr<Gtk::Dialog>    _blockStampDialog;
 
         lookupMapSlice _blockStampMap;
-        u16            _blockStampWidth;
+        u16            _blockStampWidth       = 0;
         bool           _blockStampDialogInvalid = true;
 
       public:

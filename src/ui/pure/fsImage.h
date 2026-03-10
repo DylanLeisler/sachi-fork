@@ -1,5 +1,7 @@
 #pragma once
-#include <gtkmm/image.h>
+#include <algorithm>
+#include <gdkmm/texture.h>
+#include <gtkmm/picture.h>
 #include <gtkmm/widget.h>
 
 #include "../../data/bitmap.h"
@@ -23,7 +25,7 @@ namespace UI {
     class fsImageWidget : public Gtk::Widget {
       public:
       protected:
-        Gtk::Image                   _image;
+        Gtk::Picture                 _image;
         double                       _scale = 1;
         std::shared_ptr<Gdk::Pixbuf> _data;
 
@@ -31,6 +33,8 @@ namespace UI {
 
       public:
         inline fsImageWidget( ) {
+            _image.set_content_fit( Gtk::ContentFit::FILL );
+            _image.set_can_shrink( true );
             _image.set_parent( *this );
         }
 
@@ -43,7 +47,20 @@ namespace UI {
         virtual inline u16 getHeight( ) const = 0;
 
         inline void setScale( double p_scale = 1 ) {
-            if( p_scale ) { _scale = p_scale; }
+            if( p_scale ) {
+                _scale = p_scale;
+                queue_resize( );
+            }
+        }
+
+      protected:
+        inline void refreshPaintable( ) {
+            if( _data ) {
+                auto texture = Gdk::Texture::create_for_pixbuf( _data );
+                _image.set_paintable( texture );
+            } else {
+                _image.set_paintable( { } );
+            }
         }
 
       protected:
@@ -57,12 +74,18 @@ namespace UI {
             p_minimumBaseline = -1;
             p_naturalBaseline = -1;
 
+            constexpr int MAX_EXTENT = 8192;
+            auto          width      = int( getWidth( ) * _scale );
+            auto          height     = int( getHeight( ) * _scale );
+            width                    = std::clamp( width, 0, MAX_EXTENT );
+            height                   = std::clamp( height, 0, MAX_EXTENT );
+
             if( p_orientation == Gtk::Orientation::HORIZONTAL ) {
-                p_minimum = int( getWidth( ) * _scale );
-                p_natural = int( getWidth( ) * _scale );
+                p_minimum = width;
+                p_natural = width;
             } else {
-                p_minimum = int( getHeight( ) * _scale );
-                p_natural = int( getHeight( ) * _scale );
+                p_minimum = height;
+                p_natural = height;
             }
         }
 
@@ -106,7 +129,7 @@ namespace UI {
                     _cropy = 192 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_PLATFORM ) {
@@ -117,7 +140,7 @@ namespace UI {
                     _cropy = 64 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_PKMN ) {
@@ -128,7 +151,7 @@ namespace UI {
                     _cropy = 96 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_16x16 ) {
@@ -139,7 +162,7 @@ namespace UI {
                     _cropy = 16 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_32x32 ) {
@@ -150,7 +173,7 @@ namespace UI {
                     _cropy = 32 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_64x64 ) {
@@ -161,7 +184,7 @@ namespace UI {
                     _cropy = 64 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
         }
@@ -176,7 +199,7 @@ namespace UI {
                     _cropy = 192 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_PLATFORM ) {
@@ -187,7 +210,7 @@ namespace UI {
                     _cropy = 64 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_PKMN ) {
@@ -198,7 +221,7 @@ namespace UI {
                     _cropy = 96 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_16x16 ) {
@@ -209,7 +232,7 @@ namespace UI {
                     _cropy = 16 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_32x32 ) {
@@ -220,7 +243,7 @@ namespace UI {
                     _cropy = 32 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
             if( t_type == imageType::IT_SPRITE_ICON_64x64 ) {
@@ -231,7 +254,7 @@ namespace UI {
                     _cropy = 64 - p_ch;
                 }
                 _data = btm.pixbuf( );
-                _image.set( _data );
+                refreshPaintable( );
                 return;
             }
         }
@@ -266,8 +289,8 @@ namespace UI {
      */
     template <>
     class fsImage<imageType::IT_SPRITE_ANIMATED> : public fsImageWidget {
-        u16 m_width;
-        u16 m_height;
+        u16 m_width  = 0;
+        u16 m_height = 0;
 
       public:
         inline fsImage( ) : fsImageWidget( ) {
@@ -284,7 +307,7 @@ namespace UI {
             m_width  = btm.m_width;
             m_height = btm.m_height;
             _data    = btm.pixbuf( );
-            _image.set( _data );
+            refreshPaintable( );
             return;
         }
 
@@ -302,8 +325,8 @@ namespace UI {
      */
     template <>
     class fsImage<imageType::IT_BITMAP> : public fsImageWidget {
-        u16 m_width;
-        u16 m_height;
+        u16 m_width  = 0;
+        u16 m_height = 0;
 
       public:
         inline fsImage( ) : fsImageWidget( ) {
@@ -317,7 +340,7 @@ namespace UI {
             m_width  = p_data.m_width;
             m_height = p_data.m_height;
             _data    = p_data.pixbuf( );
-            _image.set( _data );
+            refreshPaintable( );
             return;
         }
 

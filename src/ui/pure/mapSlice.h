@@ -180,8 +180,8 @@ namespace UI {
         std::vector<DATA::mapBlockAtom>                                   _blocks;
         std::function<std::shared_ptr<Gdk::Pixbuf>( DATA::mapBlockAtom )> _lookupFunction;
 
-        u16 _blocksPerRow;
-        u16 _height;
+        u16 _blocksPerRow = DATA::SIZE;
+        u16 _height       = DATA::SIZE;
 
         inline u16 getWidth( ) const override {
             return _blocksPerRow;
@@ -226,8 +226,8 @@ namespace UI {
         std::vector<std::pair<DATA::computedBlock, u8>> _blocks;
         DATA::palette                                   _pals[ 16 * 5 ] = { 0 };
 
-        u16 _blocksPerRow;
-        u16 _height;
+        u16 _blocksPerRow = DATA::SIZE;
+        u16 _height       = DATA::SIZE;
         u8  _currentDaytime = 0;
 
         inline u16 getWidth( ) const override {
@@ -278,8 +278,8 @@ namespace UI {
         DATA::tileSet<1> _tiles;
         DATA::palette    _pals[ 16 * 5 ] = { 0 };
 
-        u16 _tilesPerRow;
-        u16 _height;
+        u16 _tilesPerRow = DATA::SIZE;
+        u16 _height      = DATA::SIZE;
         u8  _currentDaytime = 0;
         u8  _selectedPal    = 0;
 
@@ -407,8 +407,8 @@ namespace UI {
       private:
         std::vector<u16> _data;
 
-        u16 _colorsPerRow;
-        u16 _height;
+        u16 _colorsPerRow = DATA::SIZE;
+        u16 _height       = DATA::SIZE;
 
         inline u16 getWidth( ) const override {
             return _colorsPerRow;

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 
 #include "mapSlice.h"
@@ -242,16 +243,29 @@ namespace UI {
             return;
         }
 
+        auto width  = getWidth( );
+        auto height = getHeight( );
+        if( !width || !height ) {
+            p_minimum = 0;
+            p_natural = 0;
+            return;
+        }
+
+        // Keep sizing bounded even if corrupted state slips through.
+        constexpr int MAX_EXTENT = 8192;
+
         if( p_orientation == Gtk::Orientation::HORIZONTAL ) {
-            p_minimum = getWidth( ) * _currentScale * DATA::BLOCK_SIZE
-                        + ( getWidth( ) - 1 ) * _blockSpacing;
-            p_natural = getWidth( ) * _currentScale * DATA::BLOCK_SIZE
-                        + ( getWidth( ) - 1 ) * _blockSpacing;
+            auto req = int( width ) * int( _currentScale ) * int( DATA::BLOCK_SIZE )
+                       + ( int( width ) - 1 ) * int( _blockSpacing );
+            req       = std::clamp( req, 0, MAX_EXTENT );
+            p_minimum = req;
+            p_natural = req;
         } else {
-            p_minimum = getHeight( ) * _currentScale * DATA::BLOCK_SIZE
-                        + ( getHeight( ) - 1 ) * _blockSpacing;
-            p_natural = getHeight( ) * _currentScale * DATA::BLOCK_SIZE
-                        + ( getHeight( ) - 1 ) * _blockSpacing;
+            auto req = int( height ) * int( _currentScale ) * int( DATA::BLOCK_SIZE )
+                       + ( int( height ) - 1 ) * int( _blockSpacing );
+            req       = std::clamp( req, 0, MAX_EXTENT );
+            p_minimum = req;
+            p_natural = req;
         }
     }
 

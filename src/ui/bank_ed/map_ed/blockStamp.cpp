@@ -27,6 +27,14 @@ namespace UI::MED {
     }
 
     void blockStamp::update( const std::vector<DATA::mapBlockAtom>& p_blockData, u16 p_width ) {
+        if( p_blockData.empty( ) || !p_width ) {
+            _blockStampData.clear( );
+            _blockStampWidth = 0;
+            _blockStampDialogInvalid = true;
+            if( _blockStampDialog ) { _blockStampDialog->hide( ); }
+            return;
+        }
+
         _blockStampWidth = p_width;
         _blockStampData  = p_blockData;
 
@@ -38,10 +46,12 @@ namespace UI::MED {
             _blockStampWidth );
         _blockStampMap.draw( );
         _blockStampMap.setOverlayHidden( _currentMapDisplayMode != mapEditor::MODE_EDIT_MOVEMENT );
-        _blockStampDialog->show( );
+        if( _blockStampDialog ) { _blockStampDialog->show( ); }
     }
 
     void blockStamp::redraw( ) {
+        if( _blockStampData.empty( ) || !_blockStampWidth ) { return; }
+
         _blockStampMap.draw( );
         _blockStampMap.setOverlayHidden( _currentMapDisplayMode != mapEditor::MODE_EDIT_MOVEMENT );
         _blockStampMap.setSpacing( _model.m_settings.m_blockSpacing );

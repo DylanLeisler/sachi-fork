@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <gtkmm/centerbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -399,11 +400,10 @@ namespace UI {
                 _wpImage.load( _model.bank( ).m_wpMap );
                 _touchArea.set_valign( Gtk::Align::START );
                 _touchArea.set_halign( Gtk::Align::START );
+                auto mapImageRes = std::max<u8>( 1, _model.bank( ).m_mapImageRes );
                 _touchArea.set_size_request(
-                    ( DATA::MAP_LOCATION_RES / _model.bank( ).m_mapImageRes )
-                        * _model.bank( ).getSizeX( ) * 3,
-                    ( DATA::MAP_LOCATION_RES / _model.bank( ).m_mapImageRes )
-                        * _model.bank( ).getSizeY( ) * 3 );
+                    ( DATA::MAP_LOCATION_RES / mapImageRes ) * _model.bank( ).getSizeX( ) * 3,
+                    ( DATA::MAP_LOCATION_RES / mapImageRes ) * _model.bank( ).getSizeY( ) * 3 );
                 _touchArea.set_margin_top( 16 + _model.bank( ).m_mapImageShiftY * 1 );
                 _touchArea.set_margin_start( 32 + _model.bank( ).m_mapImageShiftX * 1 );
                 if( !_disableSB ) {

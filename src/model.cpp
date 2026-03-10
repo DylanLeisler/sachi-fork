@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 
 #include "data/fs/util.h"
@@ -340,13 +341,16 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
 
     // Load all maps of the bank into mem
     if( !selb.m_loaded || p_forceRead ) {
+        message_log( "load bank", "Stage 1: begin read/prepare." );
+        auto oldInfo = selb.m_info;
 
         // Load the *bank file
         auto path
             = fs::path( m_fsdata.mapPath( ) ) / fs::path( std::to_string( p_bank ) + ".bank" );
         FILE* f = fopen( path.c_str( ), "rb" );
 
-        if( !DATA::readMapBank( f, &selb.m_info, &selb.m_bank ) ) {
+        auto readCombined = DATA::readMapBank( f, &selb.m_info, &selb.m_bank );
+        if( !readCombined ) {
             message_log( "load bank", std::string( "Map bank file " ) + std::to_string( p_bank )
                                           + ".bank does not exist (path " + path.c_str( )
                                           + "). Trying on my own." );
@@ -354,8 +358,26 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
             // contain useful information, so we are good
         }
         if( f ) { fclose( f ); }
+        message_log( "load bank", "Stage 2: header read complete." );
 
-        if( !selb.isCombined( ) ) {
+        // Protect against malformed/foreign .bank headers causing impossible dimensions and
+        // runaway UI sizing.
+        if( selb.getSizeX( ) > DATA::MAX_MAP_X || selb.getSizeY( ) > DATA::MAX_MAP_Y
+            || selb.getMapMode( ) > DATA::MAPMODE_COMBINED ) {
+            message_error( "load bank",
+                           std::string( "Invalid map bank header for bank " )
+                               + std::to_string( p_bank ) + " ("
+                               + std::to_string( selb.getSizeX( ) + 1 ) + "x"
+                               + std::to_string( selb.getSizeY( ) + 1 ) + ", mode "
+                               + std::to_string( selb.getMapMode( ) )
+                               + "). Falling back to discovered bank dimensions." );
+            selb.m_info = oldInfo;
+            selb.m_bank = DATA::mapBank{ };
+            readCombined = false;
+        }
+
+        if( !selb.isCombined( ) || !readCombined ) {
+            message_log( "load bank", "Stage 3: reading slice/mapdata files." );
             // not a combined map bank, we need to read the data ourselves
             selb.m_bank.m_slices = std::vector<std::vector<DATA::mapSlice>>(
                 selb.getSizeY( ) + 1,
@@ -366,8 +388,10 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
             for( u16 y{ 0 }; y <= selb.getSizeY( ); ++y ) {
                 for( u16 x{ 0 }; x <= selb.getSizeX( ); ++x ) { readMapSlice( p_bank, x, y ); }
             }
+            message_log( "load bank", "Stage 3: finished slice/mapdata files." );
         }
 
+        message_log( "load bank", "Stage 4: computing block/tile/palette cache." );
         selb.m_computedBank = std::vector<std::vector<DATA::computedMapSlice>>(
             selb.getSizeY( ) + 1, std::vector<DATA::computedMapSlice>(
                                       selb.getSizeX( ) + 1, DATA::computedMapSlice( ) ) );
@@ -387,8 +411,10 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
                     = selb.m_bank.m_slices[ y ][ x ].compute( &bs, &ts );
             }
         }
+        message_log( "load bank", "Stage 4: finished compute cache." );
 
         if( selb.m_info.m_isOWMap ) {
+            message_log( "load bank", "Stage 5: loading OW map metadata/images." );
             // read location file
             auto owpath = fs::path( m_fsdata.mapLocationPath( ) )
                           / fs::path( std::to_string( p_bank ) + ".loc.data" );
@@ -397,10 +423,14 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
 
             if( owf ) {
                 u8 meta[ 5 ] = { };
-                fread( meta, sizeof( u8 ), 5, owf );
-                selb.m_mapImageRes    = meta[ 2 ];
-                selb.m_mapImageShiftX = meta[ 3 ];
-                selb.m_mapImageShiftY = meta[ 4 ];
+                auto read = fread( meta, sizeof( u8 ), 5, owf );
+                if( read == 5 ) {
+                    // Guard against corrupt loc metadata that can produce divide-by-zero and
+                    // invalid widget sizing in map/overlay rendering.
+                    selb.m_mapImageRes    = meta[ 2 ] ? meta[ 2 ] : 1;
+                    selb.m_mapImageShiftX = meta[ 3 ];
+                    selb.m_mapImageShiftY = meta[ 4 ];
+                }
                 fclose( owf );
             }
 
@@ -424,11 +454,14 @@ bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
 
             selb.m_wpMap = DATA::bitmap::fromBGImage(
                 ( m_fsdata.wpMapPicturePath( ) + std::to_string( p_bank ) + ".wp.raw" ).c_str( ) );
+            message_log( "load bank", "Stage 5: finished OW map metadata/images." );
         }
 
         selb.m_loaded = true;
+        message_log( "load bank", "Stage 6: bank marked loaded." );
     }
 
+    message_log( "load bank", "Stage 7: checkOrLoadBank complete." );
     return true;
 }
 
@@ -1390,7 +1423,8 @@ const model::stringCache& model::trainerClasses( ) {
 
 void model::recomputeDexWPPic( ) {
     auto& bnk   = bank( );
-    auto  scale = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * bnk.m_mapImageRes );
+    auto  mapImageRes = std::max<u8>( 1, bnk.m_mapImageRes );
+    auto  scale       = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * mapImageRes );
 
     auto btm = DATA::bitmap{ 256, 192 };
 
@@ -1411,8 +1445,8 @@ void model::recomputeDexWPPic( ) {
                         }
                     }
                     res.round( 16 );
-                    btm( bnk.m_wildPokeMapShiftX + x * 2 * bnk.m_mapImageRes + bx,
-                         bnk.m_wildPokeMapShiftY + y * 2 * bnk.m_mapImageRes + by )
+                    btm( bnk.m_wildPokeMapShiftX + x * 2 * mapImageRes + bx,
+                         bnk.m_wildPokeMapShiftY + y * 2 * mapImageRes + by )
                         = res;
                 }
             }
@@ -1432,7 +1466,8 @@ void model::recomputeDexWPPic( ) {
 
 void model::recomputeBankPic( ) {
     auto& bnk   = bank( );
-    auto  scale = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * bnk.m_mapImageRes );
+    auto  mapImageRes = std::max<u8>( 1, bnk.m_mapImageRes );
+    auto  scale       = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * mapImageRes );
 
     auto btm = DATA::bitmap{ 256, 192 };
 
@@ -1453,8 +1488,8 @@ void model::recomputeBankPic( ) {
                         }
                     }
                     res.round( 16 );
-                    btm( bnk.m_mapImageShiftX + x * 2 * bnk.m_mapImageRes + bx,
-                         bnk.m_mapImageShiftY + y * 2 * bnk.m_mapImageRes + by )
+                    btm( bnk.m_mapImageShiftX + x * 2 * mapImageRes + bx,
+                         bnk.m_mapImageShiftY + y * 2 * mapImageRes + by )
                         = res;
                 }
             }
@@ -1521,7 +1556,8 @@ DATA::pixel model::colorForLocation( u16 p_loc ) {
 
 void model::recomputeBankLocationOverlay( ) {
     auto& bnk   = bank( );
-    auto  scale = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * bnk.m_mapImageRes );
+    auto  mapImageRes = std::max<u8>( 1, bnk.m_mapImageRes );
+    auto  scale       = DATA::SIZE * DATA::BLOCK_SIZE / ( 2 * mapImageRes );
 
     auto divs = DATA::SIZE / DATA::MAP_LOCATION_RES;
 

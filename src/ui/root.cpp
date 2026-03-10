@@ -763,12 +763,16 @@ namespace UI {
     }
 
     void root::loadMap( u16 p_bank, u8 p_mapY, u8 p_mapX ) {
+        message_log( "loadMap", "Stage A: enter root::loadMap." );
         if( _model.selectedBank( ) == -1 ) { switchContext( CONTEXT_MAP_EDITOR ); }
 
+        message_log( "loadMap", "Stage B: before loadMapBank." );
         loadMapBank( p_bank );
+        message_log( "loadMap", "Stage C: after loadMapBank." );
         if( !_model.bank( ).m_loaded ) { return; }
 
         _model.selectMap( p_mapX, p_mapY );
+        message_log( "loadMap", "Stage D: selected map." );
         _model.m_settings.m_tseBS1 = _model.slice( ).m_data.m_tIdx1;
         _model.m_settings.m_tseBS2 = _model.slice( ).m_data.m_tIdx2;
 
@@ -786,7 +790,9 @@ namespace UI {
         }
 
         switchContext( CONTEXT_MAP_EDITOR );
+        message_log( "loadMap", "Stage E: switched context." );
         redraw( );
+        message_log( "loadMap", "Stage F: redraw complete." );
     }
 
     void root::moveToMap( s8 p_dy, s8 p_dx ) {
