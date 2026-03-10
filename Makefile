@@ -37,7 +37,7 @@ CFLAGS	=-std=c++20 -MMD -MP -MF $(@:$(OBJDIR)/%.o=$(OBJDIR)/%.d) \
 		 -I/opt/homebrew/include/
 CPPFLAGS= $(CFLAGS)
 
-.PHONY: all clean
+.PHONY: all clean rebuild
 
 all: sachi
 
@@ -54,7 +54,10 @@ sachi:	$(OBJS)
 clean:
 	$(RM) -r $(OBJDIR) $(OBJDIR)
 
+rebuild:
+	$(MAKE) clean
+	$(MAKE) -j$$(nproc)
+
 ifeq "$(MAKECMDGOALS)" ""
 	-include $(DEPS)
 endif
-
