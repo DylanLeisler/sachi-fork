@@ -3,7 +3,9 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/label.h>
 #include <gtkmm/spinbutton.h>
 
 #include "../../../model.h"
@@ -32,6 +34,8 @@ namespace UI::MED {
         Gtk::SpinButton              _mapEditorSettings6;
         Gtk::SpinButton              _mapEditorSettings7;
         Gtk::SpinButton              _mapEditorSettings8;
+        Gtk::CheckButton             _mapEditorPatternToggle;
+        Gtk::Label                   _mapEditorPatternModeLabel;
 
         Gtk::Box _abSb1; // map grid settings box, contains _mapEditorSettings1
         Gtk::Box _abSb2; // scale settings box, contains _mapEditorSettings2
@@ -40,6 +44,7 @@ namespace UI::MED {
         Gtk::Box _abEb2; // num adjacent blocks settings box, contains _mapEditorSettings5
         Gtk::Box _abEb3; // neighbor spacing settings box, contains _mapEditorSettings6
         Gtk::Box _abEb4; // tile brush settings box, contains _mapEditorSettings7/8
+        Gtk::Box _abEb5; // tile brush mode toggle
 
       public:
         actionBar( model& p_model, root& p_rootWindow );

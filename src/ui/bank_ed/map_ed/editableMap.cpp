@@ -158,6 +158,12 @@ namespace UI::MED {
 
                 _currentMap[ x + 1 ][ y + 1 ].setSpacing( _model.m_settings.m_blockSpacing );
                 _currentMap[ x + 1 ][ y + 1 ].setScale( _model.m_settings.m_blockScale );
+                if( _currentMapDisplayMode == mapEditor::MODE_EDIT_TILES ) {
+                    _currentMap[ x + 1 ][ y + 1 ].setSelectionSize(
+                        _model.m_settings.m_tileBrushWidth, _model.m_settings.m_tileBrushHeight );
+                } else {
+                    _currentMap[ x + 1 ][ y + 1 ].setSelectionSize( 1, 1 );
+                }
 
                 _currentMap[ x + 1 ][ y + 1 ].setOverlayHidden( _currentMapDisplayMode
                                                                 != mapEditor::MODE_EDIT_MOVEMENT );
@@ -921,6 +927,13 @@ namespace UI::MED {
 
                         const u16 baseDataX = p_blockX + xcorr;
                         const u16 baseDataY = p_blockY + ycorr;
+                        const bool usePattern = _model.m_settings.m_tileBrushPatternMode;
+                        const u16 sourceBlock = _model.m_settings.m_currentlySelectedBlock.m_blockidx;
+                        const bool sourceInTs2 = sourceBlock >= DATA::MAX_BLOCKS_PER_TILE_SET;
+                        const u16 sourceLocalBlock
+                            = sourceInTs2 ? sourceBlock - DATA::MAX_BLOCKS_PER_TILE_SET : sourceBlock;
+                        const u16 selectorWidth
+                            = _model.m_settings.m_blockSetWidth ? _model.m_settings.m_blockSetWidth : 1;
 
                         for( u16 dy{ 0 }; dy < brushH; ++dy ) {
                             if( p_blockY + dy >= visH || baseDataY + dy >= DATA::SIZE ) { break; }
@@ -928,9 +941,17 @@ namespace UI::MED {
                                 if( p_blockX + dx >= visW || baseDataX + dx >= DATA::SIZE ) {
                                     break;
                                 }
+
+                                u16 paintBlockIdx = sourceBlock;
+                                if( usePattern ) {
+                                    const u16 srcLocal = sourceLocalBlock + dy * selectorWidth + dx;
+                                    if( srcLocal >= DATA::MAX_BLOCKS_PER_TILE_SET ) { continue; }
+                                    paintBlockIdx
+                                        = sourceInTs2 ? srcLocal + DATA::MAX_BLOCKS_PER_TILE_SET : srcLocal;
+                                }
+
                                 auto& b = mp.m_data.m_blocks[ baseDataY + dy ][ baseDataX + dx ];
-                                b.m_blockidx
-                                    = _model.m_settings.m_currentlySelectedBlock.m_blockidx;
+                                b.m_blockidx = paintBlockIdx;
                                 _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].updateBlock(
                                     b, p_blockX + dx, p_blockY + dy );
                             }

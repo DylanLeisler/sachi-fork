@@ -15,6 +15,7 @@ namespace UI {
 
     mapSlice::~mapSlice( ) {
         for( auto& im : _images ) { im->unparent( ); }
+        if( _selectionRegion.get_parent( ) == this ) { _selectionRegion.unparent( ); }
     }
 
     void mapSlice::updateBlockMovement( u8 p_oldvalue, u8 p_movement, u16 p_x, u16 p_y ) {
@@ -60,31 +61,47 @@ namespace UI {
     }
 
     void mapSlice::selectBlock( s16 p_blockIdx ) {
-        if( _currentSelectionIndex > -1 && _currentSelectionIndex < (int) _images.size( )
-            && _images[ _currentSelectionIndex ] ) {
-            _images[ _currentSelectionIndex ]->remove_overlay( _selectionBox );
-        }
         if( p_blockIdx >= 0 && p_blockIdx < (int) _images.size( ) ) {
-            _images[ p_blockIdx ]->add_overlay( _selectionBox );
-        }
-        if( p_blockIdx >= -1 && p_blockIdx < (int) _images.size( ) ) {
-            _currentSelectionIndex = p_blockIdx;
+            const u16 x0 = p_blockIdx % getWidth( );
+            const u16 y0 = p_blockIdx / getWidth( );
+            if( x0 < getWidth( ) && y0 < getHeight( ) ) {
+                _selectionX = x0;
+                _selectionY = y0;
+                _selectionW = std::min<u16>( _selectionWidth, getWidth( ) - x0 );
+                _selectionH = std::min<u16>( _selectionHeight, getHeight( ) - y0 );
+                _selectionVisible = _selectionW && _selectionH;
+            } else {
+                _selectionVisible = false;
+            }
+            _selectionAnchorIndex = p_blockIdx;
+        } else {
+            _selectionAnchorIndex = -1;
+            _selectionVisible     = false;
         }
 
-        _selectionBox.get_style_context( )->add_class( "mapblock-selected" );
+        if( !_selectionVisible ) {
+            _selectionRegion.hide( );
+            if( _selectionRegion.get_parent( ) == this ) { _selectionRegion.unparent( ); }
+            return;
+        }
+
+        _selectionRegion.get_style_context( )->add_class( "mapblock-selected" );
+        if( _selectionRegion.get_parent( ) == this ) { _selectionRegion.unparent( ); }
+        _selectionRegion.set_parent( *this );
+        _selectionRegion.show( );
+        queue_allocate( );
     }
 
     void mapSlice::setScale( u16 p_scale ) {
         if( p_scale ) {
             _currentScale = p_scale;
-
-            _selectionBox.set_size_request( _currentScale * DATA::BLOCK_SIZE - 4,
-                                            _currentScale * DATA::BLOCK_SIZE - 4 );
+            if( _selectionAnchorIndex >= 0 ) { selectBlock( _selectionAnchorIndex ); }
         }
     }
 
     void mapSlice::setSpacing( u16 p_blockSpacing ) {
         _blockSpacing = p_blockSpacing;
+        if( _selectionAnchorIndex >= 0 ) { selectBlock( _selectionAnchorIndex ); }
     }
 
     void mapSlice::setOverlayOpacity( double p_newValue ) {
@@ -180,7 +197,7 @@ namespace UI {
     }
 
     void mapSlice::draw( ) {
-        auto oldsel = _currentSelectionIndex;
+        auto oldsel = _selectionAnchorIndex;
         selectBlock( -1 );
         for( auto& im : _images ) { im->unparent( ); }
         _images.clear( );
@@ -306,6 +323,22 @@ namespace UI {
             allo.set_width( width );
             allo.set_height( height );
             im->size_allocate( allo, p_baseline );
+        }
+
+        if( _selectionVisible && _selectionRegion.get_parent( ) == this ) {
+            Gtk::Allocation selAllo;
+            const auto sx = _selectionX * _currentScale * DATA::BLOCK_SIZE + _selectionX * _blockSpacing;
+            const auto sy = _selectionY * _currentScale * DATA::BLOCK_SIZE + _selectionY * _blockSpacing;
+            auto sw       = _selectionW * _currentScale * DATA::BLOCK_SIZE;
+            auto sh       = _selectionH * _currentScale * DATA::BLOCK_SIZE;
+            if( _selectionW > 0 ) { sw += ( _selectionW - 1 ) * _blockSpacing; }
+            if( _selectionH > 0 ) { sh += ( _selectionH - 1 ) * _blockSpacing; }
+
+            selAllo.set_x( sx );
+            selAllo.set_y( sy );
+            selAllo.set_width( sw );
+            selAllo.set_height( sh );
+            _selectionRegion.size_allocate( selAllo, p_baseline );
         }
     }
 

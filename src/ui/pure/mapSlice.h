@@ -38,8 +38,10 @@ namespace UI {
       private:
         u16 _currentScale = 1;
         u16 _blockSpacing = 0;
+        u16 _selectionWidth = 1;
+        u16 _selectionHeight = 1;
 
-        s16 _currentSelectionIndex = -1;
+        s16 _selectionAnchorIndex = -1;
 
         double _overlayOpacity      = .3;
         double _marksOpacity        = .3;
@@ -49,14 +51,16 @@ namespace UI {
 
         std::vector<std::shared_ptr<Gtk::Overlay>> _images;
         std::vector<std::shared_ptr<Gdk::Pixbuf>>  _imageData;
-        std::vector<std::shared_ptr<Gtk::Label>>   _overlayMovement;
-        std::vector<std::shared_ptr<Gtk::Label>>   _overlayMarks;
-        std::vector<std::vector<mark>>             _marks;
+        std::vector<std::shared_ptr<Gtk::Label>> _overlayMovement;
+        std::vector<std::shared_ptr<Gtk::Label>> _overlayMarks;
+        std::vector<std::vector<mark>>           _marks;
 
         std::shared_ptr<Gtk::GestureClick> _clickEvent;
         std::shared_ptr<Gtk::GestureDrag>  _dragEvent;
 
-        Gtk::Box _selectionBox;
+        Gtk::Box _selectionRegion;
+        bool     _selectionVisible = false;
+        u16      _selectionX = 0, _selectionY = 0, _selectionW = 1, _selectionH = 1;
 
       protected:
         virtual void                         redrawBlock( u16 p_blockIdx );
@@ -84,11 +88,7 @@ namespace UI {
             _dragEvent->set_button( 0 );
             add_controller( _dragEvent );
 
-            _selectionBox = Gtk::Box( );
-            _selectionBox.get_style_context( )->add_class( "mapblock-selected" );
-            _selectionBox.set_size_request( _currentScale * DATA::BLOCK_SIZE - 4,
-                                            _currentScale * DATA::BLOCK_SIZE - 4 );
-            _currentSelectionIndex = -1;
+            _selectionAnchorIndex = -1;
         }
         virtual ~mapSlice( );
 
@@ -157,6 +157,11 @@ namespace UI {
 
         virtual void setScale( u16 p_scale = 1 );
         virtual void setSpacing( u16 p_blockSpacing = 0 );
+        virtual inline void setSelectionSize( u16 p_blockWidth = 1, u16 p_blockHeight = 1 ) {
+            _selectionWidth  = std::max<u16>( p_blockWidth, 1 );
+            _selectionHeight = std::max<u16>( p_blockHeight, 1 );
+            if( _selectionAnchorIndex >= 0 ) { selectBlock( _selectionAnchorIndex ); }
+        }
         virtual void setOverlayHidden( bool p_hidden = true );
         virtual void setMarksHidden( bool p_hidden = true );
 

@@ -131,10 +131,12 @@ namespace UI::MED {
         _abEb2 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         _abEb3 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         _abEb4 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
+        _abEb5 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         abEndBox.append( _abEb1 );
         abEndBox.append( _abEb2 );
         abEndBox.append( _abEb3 );
         abEndBox.append( _abEb4 );
+        abEndBox.append( _abEb5 );
 
         auto abEAdj1 = Gtk::Adjustment::create( _model.m_settings.m_blockSetWidth, 1.0, 32.0, 1.0,
                                                 1.0, 0.0 );
@@ -163,7 +165,6 @@ namespace UI::MED {
         _mapEditorSettings5.set_max_width_chars( 1 );
         _mapEditorSettings5.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_adjacentBlocks = _mapEditorSettings5.get_value_as_int( );
-            printf( "val changed %d\n", _model.m_settings.m_adjacentBlocks );
             _rootWindow.redraw( );
             _mapEditorSettings5.grab_focus( );
         } );
@@ -185,7 +186,7 @@ namespace UI::MED {
         _mapEditorSettings7.set_max_width_chars( 1 );
         _mapEditorSettings7.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tileBrushWidth = _mapEditorSettings7.get_value_as_int( );
-            _rootWindow.redrawPanel( );
+            _rootWindow.redraw( );
             _mapEditorSettings7.grab_focus( );
         } );
 
@@ -195,8 +196,22 @@ namespace UI::MED {
         _mapEditorSettings8.set_max_width_chars( 1 );
         _mapEditorSettings8.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tileBrushHeight = _mapEditorSettings8.get_value_as_int( );
-            _rootWindow.redrawPanel( );
+            _rootWindow.redraw( );
             _mapEditorSettings8.grab_focus( );
+        } );
+
+        _mapEditorPatternToggle = Gtk::CheckButton( );
+        _mapEditorPatternToggle.set_active( _model.m_settings.m_tileBrushPatternMode );
+        _mapEditorPatternModeLabel
+            = Gtk::Label( _model.m_settings.m_tileBrushPatternMode ? "Pattern" : "Repeat" );
+        _mapEditorPatternModeLabel.set_margin_start( MARGIN / 2 );
+        _mapEditorPatternToggle.signal_toggled( ).connect( [ & ]( ) {
+            _model.m_settings.m_tileBrushPatternMode = _mapEditorPatternToggle.get_active( );
+            _mapEditorPatternModeLabel.set_text( _model.m_settings.m_tileBrushPatternMode
+                                                     ? "Pattern"
+                                                     : "Repeat" );
+            _rootWindow.redraw( );
+            _mapEditorPatternToggle.grab_focus( );
         } );
 
         auto abEl1 = Gtk::Image( );
@@ -217,6 +232,8 @@ namespace UI::MED {
         _abEb4.append( _mapEditorSettings7 );
         _abEb4.append( abEl5 );
         _abEb4.append( _mapEditorSettings8 );
+        _abEb5.append( _mapEditorPatternModeLabel );
+        _abEb5.append( _mapEditorPatternToggle );
     }
 
     void actionBar::hide( ) {
@@ -238,6 +255,7 @@ namespace UI::MED {
             if( !_abEb2.is_visible( ) ) { _abEb2.show( ); }
             if( !_abEb3.is_visible( ) ) { _abEb3.show( ); }
             if( !_abEb4.is_visible( ) ) { _abEb4.show( ); }
+            if( !_abEb5.is_visible( ) ) { _abEb5.show( ); }
             if( !_abSb1.is_visible( ) ) { _abSb1.show( ); }
             if( !_abSb2.is_visible( ) ) { _abSb2.show( ); }
             if( !_abSb3.is_visible( ) ) { _abSb3.show( ); }
@@ -249,6 +267,7 @@ namespace UI::MED {
             if( !_abEb2.is_visible( ) ) { _abEb2.show( ); }
             if( !_abEb3.is_visible( ) ) { _abEb3.show( ); }
             if( _abEb4.is_visible( ) ) { _abEb4.hide( ); }
+            if( _abEb5.is_visible( ) ) { _abEb5.hide( ); }
             if( !_abSb1.is_visible( ) ) { _abSb1.show( ); }
             if( !_abSb2.is_visible( ) ) { _abSb2.show( ); }
             if( !_abSb3.is_visible( ) ) { _abSb3.show( ); }
@@ -258,6 +277,7 @@ namespace UI::MED {
             if( _abEb2.is_visible( ) ) { _abEb2.hide( ); }
             if( _abEb3.is_visible( ) ) { _abEb3.hide( ); }
             if( _abEb4.is_visible( ) ) { _abEb4.hide( ); }
+            if( _abEb5.is_visible( ) ) { _abEb5.hide( ); }
             if( _abSb1.is_visible( ) ) { _abSb1.hide( ); }
             if( _abSb2.is_visible( ) ) { _abSb2.hide( ); }
             if( _abSb3.is_visible( ) ) { _abSb3.hide( ); }
