@@ -191,9 +191,11 @@ namespace UI {
         }
 
         inline std::shared_ptr<Gdk::Pixbuf> computeImageData( u16 p_blockIdx ) override {
+            if( p_blockIdx >= _blocks.size( ) || !_lookupFunction ) { return tile::createImage( 0 ); }
             return _lookupFunction( _blocks[ p_blockIdx ] );
         }
         inline u8 computeMovementData( u16 p_blockIdx ) override {
+            if( p_blockIdx >= _blocks.size( ) ) { return 0; }
             return u8( _blocks[ p_blockIdx ].m_movedata );
         }
 
@@ -238,10 +240,12 @@ namespace UI {
         }
 
         inline std::shared_ptr<Gdk::Pixbuf> computeImageData( u16 p_blockIdx ) override {
+            if( p_blockIdx >= _blocks.size( ) ) { return tile::createImage( 0 ); }
             return block::createImage( _blocks[ p_blockIdx ].first, _pals, _currentDaytime );
         }
 
         inline u8 computeMovementData( u16 p_blockIdx ) override {
+            if( p_blockIdx >= _blocks.size( ) ) { return 0; }
             return _blocks[ p_blockIdx ].second;
         }
 
@@ -257,6 +261,8 @@ namespace UI {
         }
 
         inline const DATA::computedBlock& getBlockData( u16 p_blockIdx ) const {
+            static const DATA::computedBlock EMPTY_BLOCK = DATA::computedBlock( );
+            if( p_blockIdx >= _blocks.size( ) ) { return EMPTY_BLOCK; }
             return _blocks[ p_blockIdx ].first;
         }
         inline const DATA::computedBlock& getBlockData( u16 p_blockX, u16 p_blockY ) const {
@@ -291,6 +297,7 @@ namespace UI {
         }
 
         inline std::shared_ptr<Gdk::Pixbuf> computeImageData( u16 p_blockIdx ) override {
+            if( p_blockIdx >= DATA::MAX_TILES_PER_TILE_SET ) { return tile::createImage( 0 ); }
             return tile::createImage( _tiles.m_tiles[ p_blockIdx ],
                                       _pals[ 16 * _currentDaytime + _selectedPal ], false, false );
         }

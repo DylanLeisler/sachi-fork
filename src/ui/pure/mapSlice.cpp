@@ -299,12 +299,14 @@ namespace UI {
 
     void lookupMapSlice::updateBlock( const DATA::mapBlockAtom& p_block, u16 p_x, u16 p_y ) {
         auto pos{ p_x + p_y * _blocksPerRow };
+        if( pos >= _blocks.size( ) ) { return; }
         _blocks[ pos ] = p_block;
         redrawBlock( pos );
     }
 
     void lookupMapSlice::updateBlockMovement( u8 p_movement, u16 p_x, u16 p_y ) {
         auto pos{ p_x + p_y * _blocksPerRow };
+        if( pos >= _blocks.size( ) ) { return; }
         mapSlice::updateBlockMovement( _blocks[ pos ].m_movedata, p_movement, p_x, p_y );
         _blocks[ pos ].m_movedata = p_movement;
     }
@@ -323,12 +325,14 @@ namespace UI {
 
     void computedMapSlice::updateBlock( const DATA::computedBlock& p_block, u16 p_x, u16 p_y ) {
         auto pos{ p_x + p_y * _blocksPerRow };
+        if( pos >= _blocks.size( ) ) { return; }
         _blocks[ pos ] = { p_block, _blocks[ pos ].second };
         redrawBlock( pos );
     }
 
     void computedMapSlice::updateBlockMovement( u8 p_movement, u16 p_x, u16 p_y ) {
         auto pos{ p_x + p_y * _blocksPerRow };
+        if( pos >= _blocks.size( ) ) { return; }
         mapSlice::updateBlockMovement( _blocks[ pos ].second, p_movement, p_x, p_y );
         _blocks[ pos ] = { _blocks[ pos ].first, p_movement };
     }
