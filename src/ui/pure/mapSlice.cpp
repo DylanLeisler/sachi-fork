@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <cstring>
 
+#include <gdkmm/texture.h>
+#include <gtkmm/picture.h>
+
 #include "mapSlice.h"
 
 namespace UI {
@@ -141,8 +144,13 @@ namespace UI {
         _images[ p_blockIdx ] = std::make_shared<Gtk::Overlay>( );
 
         _imageData[ p_blockIdx ] = computeImageData( p_blockIdx );
-        auto im                  = Gtk::Image( );
-        im.set( _imageData[ p_blockIdx ] );
+        auto im                  = Gtk::Picture( );
+        im.set_content_fit( Gtk::ContentFit::FILL );
+        im.set_can_shrink( true );
+        if( _imageData[ p_blockIdx ] ) {
+            auto tx = Gdk::Texture::create_for_pixbuf( _imageData[ p_blockIdx ] );
+            im.set_paintable( tx );
+        }
         _images[ p_blockIdx ]->set_child( im );
         _images[ p_blockIdx ]->set_parent( *this );
 
@@ -187,9 +195,13 @@ namespace UI {
         for( u16 pos{ 0 }; pos < numblocks; ++pos ) {
             auto pb = computeImageData( pos );
             _imageData.push_back( pb );
-            auto im = Gtk::Image( );
-            im.set( pb );
-            im.set_size_request( DATA::BLOCK_SIZE, DATA::BLOCK_SIZE );
+            auto im = Gtk::Picture( );
+            im.set_content_fit( Gtk::ContentFit::FILL );
+            im.set_can_shrink( true );
+            if( pb ) {
+                auto tx = Gdk::Texture::create_for_pixbuf( pb );
+                im.set_paintable( tx );
+            }
             auto overlay = std::make_shared<Gtk::Overlay>( );
             overlay->set_child( im );
             overlay->set_parent( *this );
