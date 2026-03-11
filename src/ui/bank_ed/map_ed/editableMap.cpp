@@ -161,8 +161,10 @@ namespace UI::MED {
                 if( _currentMapDisplayMode == mapEditor::MODE_EDIT_TILES ) {
                     _currentMap[ x + 1 ][ y + 1 ].setSelectionSize(
                         _model.m_settings.m_tileBrushWidth, _model.m_settings.m_tileBrushHeight );
+                    _currentMap[ x + 1 ][ y + 1 ].setHoverEnabled( true );
                 } else {
                     _currentMap[ x + 1 ][ y + 1 ].setSelectionSize( 1, 1 );
+                    _currentMap[ x + 1 ][ y + 1 ].setHoverEnabled( false );
                 }
 
                 _currentMap[ x + 1 ][ y + 1 ].setOverlayHidden( _currentMapDisplayMode
@@ -580,6 +582,9 @@ namespace UI::MED {
                                       s8 p_mapX, s8 p_mapY, bool ) {
         _dragStart = { p_blockX, p_blockY, p_mapX, p_mapY };
         _dragLast  = { p_blockX, p_blockY };
+        if( _currentMapDisplayMode == mapEditor::MODE_EDIT_TILES ) {
+            _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].setHoverBlock( p_blockX, p_blockY );
+        }
         if( p_button == mapSlice::clickType::RIGHT ) {
             // reset blockStamp
             if( _blockStamp ) { _blockStamp->reset( ); }
@@ -599,6 +604,9 @@ namespace UI::MED {
         auto nx = sx + ( p_dX / blockwd );
         auto ny = sy + ( p_dY / blockwd );
 
+        if( _currentMapDisplayMode == mapEditor::MODE_EDIT_TILES ) {
+            _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].setHoverBlock( nx, ny );
+        }
         if( nx == lx && ny == ly ) { return; }
         _dragLast = { nx, ny };
 
@@ -749,6 +757,9 @@ namespace UI::MED {
                 }
 
                 _dragLast = { nx, ny };
+                if( _currentMapDisplayMode == mapEditor::MODE_EDIT_TILES ) {
+                    _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].setHoverBlock( nx, ny );
+                }
                 if( nx == lx && ny == ly ) { return; }
 
                 bool revx{ nx < sx };
@@ -867,6 +878,9 @@ namespace UI::MED {
     void editableMap::onMapDragEnd( mapSlice::clickType /* p_button */, s16 /* p_dX */,
                                     s16 /* p_dY */, s8 /* p_mapX */, s8 /* p_mapY */,
                                     bool /* p_allowEdit */ ) {
+        for( u8 x{ 0 }; x < 3; ++x ) {
+            for( u8 y{ 0 }; y < 3; ++y ) { _currentMap[ x ][ y ].clearHoverBlock( ); }
+        }
     }
 
     void editableMap::onMapClicked( mapSlice::clickType p_button, u16 p_blockX, u16 p_blockY,

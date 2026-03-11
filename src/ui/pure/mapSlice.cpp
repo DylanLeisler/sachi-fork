@@ -16,6 +16,7 @@ namespace UI {
     mapSlice::~mapSlice( ) {
         for( auto& im : _images ) { im->unparent( ); }
         if( _selectionRegion.get_parent( ) == this ) { _selectionRegion.unparent( ); }
+        if( _hoverRegion.get_parent( ) == this ) { _hoverRegion.unparent( ); }
     }
 
     void mapSlice::updateBlockMovement( u8 p_oldvalue, u8 p_movement, u16 p_x, u16 p_y ) {
@@ -194,6 +195,18 @@ namespace UI {
 
         _images[ p_blockIdx ]->add_overlay( *_overlayMovement[ p_blockIdx ] );
         _images[ p_blockIdx ]->add_overlay( *_overlayMarks[ p_blockIdx ] );
+
+        // Keep selection/hover overlays on top after replacing one tile overlay.
+        if( _selectionVisible && _selectionRegion.get_parent( ) == this ) {
+            _selectionRegion.unparent( );
+            _selectionRegion.set_parent( *this );
+            _selectionRegion.show( );
+        }
+        if( _hoverEnabled && _hoverVisible && _hoverRegion.get_parent( ) == this ) {
+            _hoverRegion.unparent( );
+            _hoverRegion.set_parent( *this );
+            _hoverRegion.show( );
+        }
     }
 
     void mapSlice::draw( ) {
@@ -339,6 +352,28 @@ namespace UI {
             selAllo.set_width( sw );
             selAllo.set_height( sh );
             _selectionRegion.size_allocate( selAllo, p_baseline );
+        }
+
+        if( _hoverEnabled && _hoverVisible ) {
+            _hoverRegion.get_style_context( )->add_class( "mapblock-selected" );
+            if( _hoverRegion.get_parent( ) != this ) { _hoverRegion.set_parent( *this ); }
+            _hoverRegion.show( );
+
+            Gtk::Allocation hoverAllo;
+            const auto hx = _hoverX * _currentScale * DATA::BLOCK_SIZE + _hoverX * _blockSpacing;
+            const auto hy = _hoverY * _currentScale * DATA::BLOCK_SIZE + _hoverY * _blockSpacing;
+            auto hw       = _hoverW * _currentScale * DATA::BLOCK_SIZE;
+            auto hh       = _hoverH * _currentScale * DATA::BLOCK_SIZE;
+            if( _hoverW > 0 ) { hw += ( _hoverW - 1 ) * _blockSpacing; }
+            if( _hoverH > 0 ) { hh += ( _hoverH - 1 ) * _blockSpacing; }
+
+            hoverAllo.set_x( hx );
+            hoverAllo.set_y( hy );
+            hoverAllo.set_width( hw );
+            hoverAllo.set_height( hh );
+            _hoverRegion.size_allocate( hoverAllo, p_baseline );
+        } else {
+            if( _hoverRegion.get_parent( ) == this ) { _hoverRegion.unparent( ); }
         }
     }
 

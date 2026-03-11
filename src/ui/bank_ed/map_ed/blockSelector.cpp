@@ -113,13 +113,21 @@ namespace UI::MED {
 
         _ts1widget.setScale( _model.m_settings.m_blockScale );
         _ts1widget.setSpacing( _model.m_settings.m_blockSpacing );
-        _ts1widget.setSelectionSize( _model.m_settings.m_tileBrushWidth,
-                                     _model.m_settings.m_tileBrushHeight );
+        if( _model.m_settings.m_tileBrushPatternMode ) {
+            _ts1widget.setSelectionSize( _model.m_settings.m_tileBrushWidth,
+                                         _model.m_settings.m_tileBrushHeight );
+        } else {
+            _ts1widget.setSelectionSize( 1, 1 );
+        }
         _ts1widget.queue_resize( );
         _ts2widget.setScale( _model.m_settings.m_blockScale );
         _ts2widget.setSpacing( _model.m_settings.m_blockSpacing );
-        _ts2widget.setSelectionSize( _model.m_settings.m_tileBrushWidth,
-                                     _model.m_settings.m_tileBrushHeight );
+        if( _model.m_settings.m_tileBrushPatternMode ) {
+            _ts2widget.setSelectionSize( _model.m_settings.m_tileBrushWidth,
+                                         _model.m_settings.m_tileBrushHeight );
+        } else {
+            _ts2widget.setSelectionSize( 1, 1 );
+        }
         _ts2widget.queue_resize( );
 
         _ts1widget.set( DATA::mapBlockAtom::computeBlockSet(

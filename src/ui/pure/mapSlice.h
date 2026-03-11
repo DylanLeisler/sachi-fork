@@ -5,6 +5,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/gesturedrag.h>
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
@@ -57,10 +58,15 @@ namespace UI {
 
         std::shared_ptr<Gtk::GestureClick> _clickEvent;
         std::shared_ptr<Gtk::GestureDrag>  _dragEvent;
+        std::shared_ptr<Gtk::EventControllerMotion> _motionEvent;
 
         Gtk::Box _selectionRegion;
         bool     _selectionVisible = false;
         u16      _selectionX = 0, _selectionY = 0, _selectionW = 1, _selectionH = 1;
+        Gtk::Box _hoverRegion;
+        bool     _hoverVisible = false;
+        bool     _hoverEnabled = false;
+        u16      _hoverX = 0, _hoverY = 0, _hoverW = 1, _hoverH = 1;
 
       protected:
         virtual void                         redrawBlock( u16 p_blockIdx );
@@ -87,6 +93,31 @@ namespace UI {
             _dragEvent->set_propagation_phase( Gtk::PropagationPhase::CAPTURE );
             _dragEvent->set_button( 0 );
             add_controller( _dragEvent );
+
+            _motionEvent = Gtk::EventControllerMotion::create( );
+            _motionEvent->set_propagation_phase( Gtk::PropagationPhase::CAPTURE );
+            _motionEvent->signal_motion( ).connect( [ this ]( double p_x, double p_y ) {
+                if( !_hoverEnabled ) { return; }
+                auto blockwd = _currentScale * DATA::BLOCK_SIZE + _blockSpacing;
+                if( !blockwd ) { return; }
+                const auto x = u16( p_x / blockwd );
+                const auto y = u16( p_y / blockwd );
+                if( x >= getWidth( ) || y >= getHeight( ) ) {
+                    _hoverVisible = false;
+                } else {
+                    _hoverX = x;
+                    _hoverY = y;
+                    _hoverW = std::min<u16>( _selectionWidth, getWidth( ) - x );
+                    _hoverH = std::min<u16>( _selectionHeight, getHeight( ) - y );
+                    _hoverVisible = _hoverW && _hoverH;
+                }
+                queue_allocate( );
+            } );
+            _motionEvent->signal_leave( ).connect( [ this ]( ) {
+                _hoverVisible = false;
+                queue_allocate( );
+            } );
+            add_controller( _motionEvent );
 
             _selectionAnchorIndex = -1;
         }
@@ -161,6 +192,28 @@ namespace UI {
             _selectionWidth  = std::max<u16>( p_blockWidth, 1 );
             _selectionHeight = std::max<u16>( p_blockHeight, 1 );
             if( _selectionAnchorIndex >= 0 ) { selectBlock( _selectionAnchorIndex ); }
+        }
+        virtual inline void setHoverEnabled( bool p_enabled = true ) {
+            _hoverEnabled = p_enabled;
+            if( !_hoverEnabled ) { _hoverVisible = false; }
+            queue_allocate( );
+        }
+        virtual inline void setHoverBlock( s16 p_blockX, s16 p_blockY ) {
+            if( p_blockX < 0 || p_blockY < 0 || p_blockX >= getWidth( ) || p_blockY >= getHeight( ) ) {
+                _hoverVisible = false;
+                queue_allocate( );
+                return;
+            }
+            _hoverX = u16( p_blockX );
+            _hoverY = u16( p_blockY );
+            _hoverW = std::min<u16>( _selectionWidth, getWidth( ) - _hoverX );
+            _hoverH = std::min<u16>( _selectionHeight, getHeight( ) - _hoverY );
+            _hoverVisible = _hoverEnabled && _hoverW && _hoverH;
+            queue_allocate( );
+        }
+        virtual inline void clearHoverBlock( ) {
+            _hoverVisible = false;
+            queue_allocate( );
         }
         virtual void setOverlayHidden( bool p_hidden = true );
         virtual void setMarksHidden( bool p_hidden = true );
