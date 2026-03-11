@@ -906,9 +906,35 @@ namespace UI::MED {
                             }
                         }
                     } else {
-                        block.m_blockidx = _model.m_settings.m_currentlySelectedBlock.m_blockidx;
-                        _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].updateBlock( block, p_blockX,
-                                                                             p_blockY );
+                        const u16 brushW
+                            = _model.m_settings.m_tileBrushWidth
+                                  ? _model.m_settings.m_tileBrushWidth
+                                  : 1;
+                        const u16 brushH
+                            = _model.m_settings.m_tileBrushHeight
+                                  ? _model.m_settings.m_tileBrushHeight
+                                  : 1;
+                        const u16 visW
+                            = ( p_mapX == 0 ) ? DATA::SIZE : _model.m_settings.m_adjacentBlocks;
+                        const u16 visH
+                            = ( p_mapY == 0 ) ? DATA::SIZE : _model.m_settings.m_adjacentBlocks;
+
+                        const u16 baseDataX = p_blockX + xcorr;
+                        const u16 baseDataY = p_blockY + ycorr;
+
+                        for( u16 dy{ 0 }; dy < brushH; ++dy ) {
+                            if( p_blockY + dy >= visH || baseDataY + dy >= DATA::SIZE ) { break; }
+                            for( u16 dx{ 0 }; dx < brushW; ++dx ) {
+                                if( p_blockX + dx >= visW || baseDataX + dx >= DATA::SIZE ) {
+                                    break;
+                                }
+                                auto& b = mp.m_data.m_blocks[ baseDataY + dy ][ baseDataX + dx ];
+                                b.m_blockidx
+                                    = _model.m_settings.m_currentlySelectedBlock.m_blockidx;
+                                _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].updateBlock(
+                                    b, p_blockX + dx, p_blockY + dy );
+                            }
+                        }
                     }
                 } else if( _currentMapDisplayMode == mapEditor::MODE_EDIT_MOVEMENT ) {
                     if( _blockStamp && _blockStamp->isValid( ) ) {

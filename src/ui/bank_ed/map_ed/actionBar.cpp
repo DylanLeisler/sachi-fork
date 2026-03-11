@@ -1,5 +1,6 @@
 #include <gtkmm/centerbox.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/label.h>
 #include <gtkmm/scrolledwindow.h>
 
 #include "../../../defines.h"
@@ -129,9 +130,11 @@ namespace UI::MED {
         _abEb1 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         _abEb2 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         _abEb3 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
+        _abEb4 = Gtk::Box( Gtk::Orientation::HORIZONTAL );
         abEndBox.append( _abEb1 );
         abEndBox.append( _abEb2 );
         abEndBox.append( _abEb3 );
+        abEndBox.append( _abEb4 );
 
         auto abEAdj1 = Gtk::Adjustment::create( _model.m_settings.m_blockSetWidth, 1.0, 32.0, 1.0,
                                                 1.0, 0.0 );
@@ -139,6 +142,10 @@ namespace UI::MED {
                                                 1.0, 0.0 );
         auto abEAdj3 = Gtk::Adjustment::create( _model.m_settings.m_neighborSpacing, 0.0, 50.0, 1.0,
                                                 1.0, 0.0 );
+        auto abEAdj4 = Gtk::Adjustment::create( _model.m_settings.m_tileBrushWidth, 1.0, 8.0, 1.0,
+                                                1.0, 0.0 );
+        auto abEAdj5 = Gtk::Adjustment::create( _model.m_settings.m_tileBrushHeight, 1.0, 8.0,
+                                                1.0, 1.0, 0.0 );
 
         _mapEditorSettings4 = Gtk::SpinButton( abEAdj1 );
         _mapEditorSettings4.set_margin_start( MARGIN );
@@ -172,18 +179,44 @@ namespace UI::MED {
             _mapEditorSettings6.grab_focus( );
         } );
 
+        _mapEditorSettings7 = Gtk::SpinButton( abEAdj4 );
+        _mapEditorSettings7.set_margin_start( MARGIN );
+        _mapEditorSettings7.set_width_chars( 1 );
+        _mapEditorSettings7.set_max_width_chars( 1 );
+        _mapEditorSettings7.signal_value_changed( ).connect( [ & ]( ) {
+            _model.m_settings.m_tileBrushWidth = _mapEditorSettings7.get_value_as_int( );
+            _rootWindow.redrawPanel( );
+            _mapEditorSettings7.grab_focus( );
+        } );
+
+        _mapEditorSettings8 = Gtk::SpinButton( abEAdj5 );
+        _mapEditorSettings8.set_margin_start( MARGIN / 2 );
+        _mapEditorSettings8.set_width_chars( 1 );
+        _mapEditorSettings8.set_max_width_chars( 1 );
+        _mapEditorSettings8.signal_value_changed( ).connect( [ & ]( ) {
+            _model.m_settings.m_tileBrushHeight = _mapEditorSettings8.get_value_as_int( );
+            _rootWindow.redrawPanel( );
+            _mapEditorSettings8.grab_focus( );
+        } );
+
         auto abEl1 = Gtk::Image( );
         abEl1.set_from_icon_name( "window-restore-symbolic" );
         auto abEl2 = Gtk::Image( );
         abEl2.set_from_icon_name( "process-stop-symbolic" );
         auto abEl3 = Gtk::Image( );
         abEl3.set_from_icon_name( "application-x-appliance-symbolic" );
+        auto abEl4 = Gtk::Label( "Brush" );
+        auto abEl5 = Gtk::Label( "x" );
         _abEb1.append( abEl1 );
         _abEb1.append( _mapEditorSettings4 );
         _abEb2.append( abEl2 );
         _abEb2.append( _mapEditorSettings5 );
         _abEb3.append( abEl3 );
         _abEb3.append( _mapEditorSettings6 );
+        _abEb4.append( abEl4 );
+        _abEb4.append( _mapEditorSettings7 );
+        _abEb4.append( abEl5 );
+        _abEb4.append( _mapEditorSettings8 );
     }
 
     void actionBar::hide( ) {
@@ -204,6 +237,7 @@ namespace UI::MED {
             if( !_abEb1.is_visible( ) ) { _abEb1.show( ); }
             if( !_abEb2.is_visible( ) ) { _abEb2.show( ); }
             if( !_abEb3.is_visible( ) ) { _abEb3.show( ); }
+            if( !_abEb4.is_visible( ) ) { _abEb4.show( ); }
             if( !_abSb1.is_visible( ) ) { _abSb1.show( ); }
             if( !_abSb2.is_visible( ) ) { _abSb2.show( ); }
             if( !_abSb3.is_visible( ) ) { _abSb3.show( ); }
@@ -214,6 +248,7 @@ namespace UI::MED {
             if( _abEb1.is_visible( ) ) { _abEb1.hide( ); }
             if( !_abEb2.is_visible( ) ) { _abEb2.show( ); }
             if( !_abEb3.is_visible( ) ) { _abEb3.show( ); }
+            if( _abEb4.is_visible( ) ) { _abEb4.hide( ); }
             if( !_abSb1.is_visible( ) ) { _abSb1.show( ); }
             if( !_abSb2.is_visible( ) ) { _abSb2.show( ); }
             if( !_abSb3.is_visible( ) ) { _abSb3.show( ); }
@@ -222,6 +257,7 @@ namespace UI::MED {
             if( _abEb1.is_visible( ) ) { _abEb1.hide( ); }
             if( _abEb2.is_visible( ) ) { _abEb2.hide( ); }
             if( _abEb3.is_visible( ) ) { _abEb3.hide( ); }
+            if( _abEb4.is_visible( ) ) { _abEb4.hide( ); }
             if( _abSb1.is_visible( ) ) { _abSb1.hide( ); }
             if( _abSb2.is_visible( ) ) { _abSb2.hide( ); }
             if( _abSb3.is_visible( ) ) { _abSb3.hide( ); }

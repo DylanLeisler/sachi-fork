@@ -30,6 +30,8 @@ namespace UI::MED {
         Gtk::SpinButton              _mapEditorSettings4;
         Gtk::SpinButton              _mapEditorSettings5;
         Gtk::SpinButton              _mapEditorSettings6;
+        Gtk::SpinButton              _mapEditorSettings7;
+        Gtk::SpinButton              _mapEditorSettings8;
 
         Gtk::Box _abSb1; // map grid settings box, contains _mapEditorSettings1
         Gtk::Box _abSb2; // scale settings box, contains _mapEditorSettings2
@@ -37,6 +39,7 @@ namespace UI::MED {
         Gtk::Box _abEb1; // block set width settings box, contains _mapEditorSettings4
         Gtk::Box _abEb2; // num adjacent blocks settings box, contains _mapEditorSettings5
         Gtk::Box _abEb3; // neighbor spacing settings box, contains _mapEditorSettings6
+        Gtk::Box _abEb4; // tile brush settings box, contains _mapEditorSettings7/8
 
       public:
         actionBar( model& p_model, root& p_rootWindow );
