@@ -6,6 +6,8 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/dropdown.h>
+#include <gtkmm/eventcontrollerkey.h>
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/frame.h>
 
 #include "../../../data/maprender.h"
@@ -31,6 +33,11 @@ namespace UI::MED {
         Gtk::Box         _mapEditorBlockSetBox{ Gtk::Orientation::VERTICAL };
         Gtk::DropDown    _mapEditorBS1CB, _mapEditorBS2CB; // select BS1/BS2
         computedMapSlice _ts1widget, _ts2widget;
+        bool             _hoverBS1 = false, _hoverBS2 = false;
+        bool             _bs1UpHeld = false, _bs1DownHeld = false;
+        bool             _bs2UpHeld = false, _bs2DownHeld = false;
+        int              _bs1PendingSteps = 0, _bs2PendingSteps = 0;
+        bool             _bs1Draining = false, _bs2Draining = false;
 
         std::shared_ptr<Gtk::StringList> _mapBankStrList; // block set names
 

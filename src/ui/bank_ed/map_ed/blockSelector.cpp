@@ -1,4 +1,7 @@
 #include "blockSelector.h"
+#include <algorithm>
+#include <gdk/gdkkeysyms.h>
+#include <glibmm/main.h>
 #include "../../root.h"
 
 namespace UI::MED {
@@ -46,6 +49,83 @@ namespace UI::MED {
                 _rootWindow.redraw( );
             } catch( ... ) { return; }
         } );
+
+        auto attachNudgeControls
+            = [ this ]( Gtk::DropDown& p_dd, bool& p_hover, bool& p_upHeld, bool& p_downHeld,
+                        int& p_pendingSteps, bool& p_draining ) {
+            auto motion = Gtk::EventControllerMotion::create( );
+            motion->signal_enter( ).connect( [ &p_hover ]( double, double ) { p_hover = true; } );
+            motion->signal_leave( ).connect( [ &p_hover ]( ) { p_hover = false; } );
+            p_dd.add_controller( motion );
+
+            auto applyStep = [ this, &p_dd ]( int p_step ) {
+                if( !_mapBankStrList || !_mapBankStrList->get_n_items( ) ) { return; }
+                auto current = p_dd.get_selected( );
+                if( current == GTK_INVALID_LIST_POSITION ) { current = 0; }
+                auto maxIdx = int( _mapBankStrList->get_n_items( ) ) - 1;
+                auto next   = std::clamp<int>( int( current ) + p_step, 0, maxIdx );
+                if( next != int( current ) ) { p_dd.set_selected( next ); }
+            };
+            auto scheduleDrain = [ &p_pendingSteps, &p_draining, applyStep ]( ) {
+                if( p_draining ) { return; }
+                p_draining = true;
+                Glib::signal_timeout( ).connect(
+                    [ &p_pendingSteps, &p_draining, applyStep ]( ) -> bool {
+                        if( p_pendingSteps == 0 ) {
+                            p_draining = false;
+                            return false;
+                        }
+                        if( p_pendingSteps > 0 ) {
+                            --p_pendingSteps;
+                            applyStep( 1 );
+                        } else {
+                            ++p_pendingSteps;
+                            applyStep( -1 );
+                        }
+                        return true;
+                    },
+                    12 );
+            };
+
+            auto key = Gtk::EventControllerKey::create( );
+            key->signal_key_pressed( ).connect(
+                [ this, &p_dd, &p_hover, &p_upHeld,
+                  &p_downHeld, &p_pendingSteps, scheduleDrain ]( guint p_keyval, guint,
+                                                                  Gdk::ModifierType ) -> bool {
+                    if( !p_dd.has_focus( ) && !p_hover ) { return false; }
+                    if( !_mapBankStrList || !_mapBankStrList->get_n_items( ) ) { return false; }
+
+                    int step = 0;
+                    if( p_keyval == GDK_KEY_Down ) {
+                        if( p_downHeld ) { return true; }
+                        p_downHeld = true;
+                        step = 1;
+                    } else if( p_keyval == GDK_KEY_Up ) {
+                        if( p_upHeld ) { return true; }
+                        p_upHeld = true;
+                        step = -1;
+                    } else {
+                        return false;
+                    }
+
+                    constexpr int MAX_PENDING_STEPS = 10;
+                    p_pendingSteps = std::clamp( p_pendingSteps + step, -MAX_PENDING_STEPS,
+                                                 MAX_PENDING_STEPS );
+                    scheduleDrain( );
+                    return true;
+                },
+                false );
+            key->signal_key_released( ).connect(
+                [ &p_upHeld, &p_downHeld ]( guint p_keyval, guint, Gdk::ModifierType ) {
+                    if( p_keyval == GDK_KEY_Up ) { p_upHeld = false; }
+                    if( p_keyval == GDK_KEY_Down ) { p_downHeld = false; }
+                } );
+            p_dd.add_controller( key );
+        };
+        attachNudgeControls( _mapEditorBS1CB, _hoverBS1, _bs1UpHeld, _bs1DownHeld,
+                             _bs1PendingSteps, _bs1Draining );
+        attachNudgeControls( _mapEditorBS2CB, _hoverBS2, _bs2UpHeld, _bs2DownHeld,
+                             _bs2PendingSteps, _bs2Draining );
 
         bsselbox.append( _mapEditorBS1CB );
         bsselbox.append( _mapEditorBS2CB );
