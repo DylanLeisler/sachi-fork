@@ -4,7 +4,7 @@
 namespace fs = std::filesystem;
 using namespace std::string_literals;
 
-const std::string APP_NAME     = std::string( "Sachi" );
+const std::string APP_NAME     = std::string( "Sachi-Fork" );
 const std::string TITLE_STRING = APP_NAME + " " + std::string( VERSION );
 
 #define conv( a )    ( (u8) ( ( a ) * 31 / 255 ) )

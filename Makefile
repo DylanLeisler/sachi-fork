@@ -14,7 +14,7 @@ TRNMSG_LEN			?= 200
 EASYPHRS_LEN		?= 200
 EASYWORD_LEN		?=  40
 
-VERSION				?= \"0.40\"
+VERSION				?= \"0.5\"
 
 
 SRCDIR := src
