@@ -9,6 +9,9 @@
 #include "../defines.h"
 #include "../model.h"
 #include "bank_ed/bankEditor.h"
+#include "data_ed/itemDataEditor.h"
+#include "data_ed/moveDataEditor.h"
+#include "data_ed/pkmnDataEditor.h"
 #include "headerBar.h"
 #include "side_p/sideBar.h"
 #include "tile_ed/tileSetEditor.h"
@@ -38,6 +41,8 @@ namespace UI {
         std::shared_ptr<Gio::SimpleAction>      _saveExportblocks2Action;
         std::shared_ptr<Gio::SimpleAction>      _saveExporttiles1Action;
         std::shared_ptr<Gio::SimpleAction>      _saveExporttiles2Action;
+        std::shared_ptr<Gio::SimpleAction>      _saveBuildfsdataAction;
+        std::shared_ptr<Gio::SimpleAction>      _saveSavebuildfsdataAction;
         std::shared_ptr<Gio::SimpleActionGroup> _specialActions;
         std::shared_ptr<Gio::SimpleAction>      _specialRecomputedns1Action;
         std::shared_ptr<Gio::SimpleAction>      _specialRecomputedns2Action;
@@ -57,12 +62,16 @@ namespace UI {
         std::shared_ptr<headerBar> _headerBar;
         std::shared_ptr<welcome>   _welcome;
 
+        Gtk::Box                           _rootBox; // top-level window child container
         Gtk::Box                           _mainBox; // main box containing all other widgets
         std::shared_ptr<sideBar>           _sideBar;
         Gtk::Label                         _loadMapLabel;
         std::shared_ptr<bankEditor>        _bankEditor;
         std::shared_ptr<tileSetEditor>     _tileSetEditor;
         std::shared_ptr<trainerBankEditor> _trainerBankEditor;
+        std::shared_ptr<pkmnDataEditor>    _pkmnDataEditor;
+        std::shared_ptr<itemDataEditor>    _itemDataEditor;
+        std::shared_ptr<moveDataEditor>    _moveDataEditor;
 
         Gtk::SpinButton _sb1, _sb2;
 
@@ -167,5 +176,8 @@ namespace UI {
          * @brief: Handler for the "Save Changes" button.
          */
         void onFsRootSaveClick( );
+
+        bool hasUnsavedMapOrTilesetChanges( ) const;
+        bool runFsdataBuild( bool p_skipWarning = false );
     };
 } // namespace UI

@@ -33,6 +33,8 @@ namespace UI {
         _saveMenu->append( "Save Single Map", "save.map" );
         _saveMenu->append( "Save Single Mapbank", "save.mapbank" );
         _saveMenu->append( "Export Map", "save.exportmap" );
+        _saveMenu->append( "Build fsdata", "save.buildfsdata" );
+        _saveMenu->append( "Save + Build fsdata", "save.savebuildfsdata" );
 
         _openMenuPopover = Gtk::PopoverMenu( _openMenu );
         _openMenuPopover.set_has_arrow( false );
@@ -102,6 +104,7 @@ namespace UI {
         switch( _context ) {
         case CONTEXT_FSROOT_NONE:
             if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
             setTitle( "", _model.m_fsdata.m_fsrootPath );
             break;
         case CONTEXT_MAP_EDITOR:
@@ -112,12 +115,26 @@ namespace UI {
             break;
         case CONTEXT_TILE_EDITOR:
             if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
             if( _openMenuTSButton ) { _openMenuTSButton->show( ); }
             if( _saveMenuTSButton ) { _saveMenuTSButton->show( ); }
             break;
         case CONTEXT_TRAINER_EDITOR:
             if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
             // TODO
+            break;
+        case CONTEXT_PKMN_DATA_EDITOR:
+            if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
+            break;
+        case CONTEXT_MOVE_DATA_EDITOR:
+            if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
+            break;
+        case CONTEXT_ITEM_DATA_EDITOR:
+            if( _saveButton ) { _saveButton->show( ); }
+            if( _saveMenuButton ) { _saveMenuButton->show( ); }
             break;
 
         default: setTitle( ); break;

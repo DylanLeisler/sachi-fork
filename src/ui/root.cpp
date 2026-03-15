@@ -3,6 +3,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/separator.h>
+#include <cstdlib>
+#include <filesystem>
 
 #include "../data/fs.h"
 #include "../data/fs/util.h"
@@ -12,6 +14,8 @@
 #include "root.h"
 
 namespace UI {
+    namespace fs = std::filesystem;
+
     void root::initActions( ) {
         _loadActions    = Gio::SimpleActionGroup::create( );
         _saveActions    = Gio::SimpleActionGroup::create( );
@@ -451,6 +455,14 @@ namespace UI {
             dialog->add_button( "_Select", Gtk::ResponseType::OK );
             dialog->show( );
         } );
+        _saveBuildfsdataAction   = _saveActions->add_action( "buildfsdata", [ this ]( ) {
+            runFsdataBuild( );
+        } );
+        _saveSavebuildfsdataAction
+            = _saveActions->add_action( "savebuildfsdata", [ this ]( ) {
+                  onFsRootSaveClick( );
+                  runFsdataBuild( );
+              } );
 
         _specialRecomputedns1Action = _specialActions->add_action( "recomputedns1", [ this ]( ) {
             _model.recomputeDNS( _model.m_settings.m_tseBS1 );
@@ -558,16 +570,16 @@ namespace UI {
         _headerBar = std::make_shared<headerBar>( _model, *this );
         if( _headerBar ) { set_titlebar( *_headerBar ); }
 
-        auto mbox = Gtk::Box( Gtk::Orientation::HORIZONTAL );
-        _mainBox  = Gtk::Box( Gtk::Orientation::HORIZONTAL );
-        set_child( mbox );
-        mbox.append( _mainBox );
+        _rootBox.set_orientation( Gtk::Orientation::HORIZONTAL );
+        _mainBox.set_orientation( Gtk::Orientation::HORIZONTAL );
+        set_child( _rootBox );
+        _rootBox.append( _mainBox );
 
         _welcome = std::make_shared<welcome>( *this );
         if( _welcome ) {
             _welcome->connect(
                 [ &, this ]( const std::string& p_path ) { this->loadNewFsRoot( p_path ); } );
-            mbox.append( *_welcome );
+            _rootBox.append( *_welcome );
         }
 
         _sideBar = std::make_shared<sideBar>( _model, *this );
@@ -586,6 +598,15 @@ namespace UI {
 
         _trainerBankEditor = std::make_shared<trainerBankEditor>( _model, *this );
         if( _trainerBankEditor ) { _mainBox.append( *_trainerBankEditor ); }
+
+        _pkmnDataEditor = std::make_shared<pkmnDataEditor>( _model, *this );
+        if( _pkmnDataEditor ) { _mainBox.append( *_pkmnDataEditor ); }
+
+        _itemDataEditor = std::make_shared<itemDataEditor>( _model, *this );
+        if( _itemDataEditor ) { _mainBox.append( *_itemDataEditor ); }
+
+        _moveDataEditor = std::make_shared<moveDataEditor>( _model, *this );
+        if( _moveDataEditor ) { _mainBox.append( *_moveDataEditor ); }
 
         initEvents( );
 
@@ -624,6 +645,8 @@ namespace UI {
         _loadImporttiles2Action->set_enabled( false );
         _saveExporttiles1Action->set_enabled( false );
         _saveExporttiles2Action->set_enabled( false );
+        _saveBuildfsdataAction->set_enabled( false );
+        _saveSavebuildfsdataAction->set_enabled( false );
 
         _specialRecomputedns1Action->set_enabled( false );
         _specialRecomputedns2Action->set_enabled( false );
@@ -639,6 +662,9 @@ namespace UI {
         _loadMapLabel.hide( );
         if( _tileSetEditor ) { _tileSetEditor->hide( ); }
         if( _trainerBankEditor ) { _trainerBankEditor->hide( ); }
+        if( _pkmnDataEditor ) { _pkmnDataEditor->hide( ); }
+        if( _itemDataEditor ) { _itemDataEditor->hide( ); }
+        if( _moveDataEditor ) { _moveDataEditor->hide( ); }
         if( _bankEditor ) { _bankEditor->hide( ); }
         if( _welcome ) { _welcome->hide( ); }
         _mainBox.hide( );
@@ -646,6 +672,8 @@ namespace UI {
         switch( p_context ) {
         case CONTEXT_FSROOT_NONE:
             _saveFsrootAction->set_enabled( true );
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
             _mainBox.show( );
             _loadMapLabel.show( );
 
@@ -662,6 +690,8 @@ namespace UI {
             _saveMapAction->set_enabled( true );
             _saveExportmapAction->set_enabled( true );
             _saveMapbankAction->set_enabled( true );
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
             _specialCopylocationsAction->set_enabled( true );
             _specialCopylocations2Action->set_enabled( true );
 
@@ -683,6 +713,8 @@ namespace UI {
             _loadImporttiles2Action->set_enabled( true );
             _saveExporttiles1Action->set_enabled( true );
             _saveExporttiles2Action->set_enabled( true );
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
 
             _specialRecomputedns1Action->set_enabled( true );
             _specialRecomputedns2Action->set_enabled( true );
@@ -697,7 +729,27 @@ namespace UI {
             _specialDeleteAction->set_enabled( true );
             _specialSelectnewAction->set_enabled( true );
             _saveFsrootAction->set_enabled( true );
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
             for( u8 i = 0; i < 10; ++i ) { _specialAction[ i ]->set_enabled( true ); }
+            break;
+        case CONTEXT_PKMN_DATA_EDITOR:
+            _mainBox.show( );
+            if( _pkmnDataEditor ) { _pkmnDataEditor->show( ); }
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
+            break;
+        case CONTEXT_MOVE_DATA_EDITOR:
+            _mainBox.show( );
+            if( _moveDataEditor ) { _moveDataEditor->show( ); }
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
+            break;
+        case CONTEXT_ITEM_DATA_EDITOR:
+            _mainBox.show( );
+            if( _itemDataEditor ) { _itemDataEditor->show( ); }
+            _saveBuildfsdataAction->set_enabled( true );
+            _saveSavebuildfsdataAction->set_enabled( true );
             break;
 
         default:
@@ -722,6 +774,15 @@ namespace UI {
         }
         if( _context == CONTEXT_TRAINER_EDITOR ) {
             if( _trainerBankEditor ) { _trainerBankEditor->redraw( ); }
+        }
+        if( _context == CONTEXT_PKMN_DATA_EDITOR ) {
+            if( _pkmnDataEditor ) { _pkmnDataEditor->redraw( ); }
+        }
+        if( _context == CONTEXT_MOVE_DATA_EDITOR ) {
+            if( _moveDataEditor ) { _moveDataEditor->redraw( ); }
+        }
+        if( _context == CONTEXT_ITEM_DATA_EDITOR ) {
+            if( _itemDataEditor ) { _itemDataEditor->redraw( ); }
         }
     }
 
@@ -988,9 +1049,86 @@ namespace UI {
     }
 
     void root::onFsRootSaveClick( ) {
+        if( _context == CONTEXT_PKMN_DATA_EDITOR && _pkmnDataEditor ) {
+            _pkmnDataEditor->saveToCsv( );
+            redraw( );
+            return;
+        }
+        if( _context == CONTEXT_MOVE_DATA_EDITOR && _moveDataEditor ) {
+            _moveDataEditor->saveToCsv( );
+            redraw( );
+            return;
+        }
+        if( _context == CONTEXT_ITEM_DATA_EDITOR && _itemDataEditor ) {
+            _itemDataEditor->saveToCsv( );
+            redraw( );
+            return;
+        }
+
         // Only write map banks that have been changed
         _model.writeFsRoot( );
         redraw( );
+    }
+
+    bool root::hasUnsavedMapOrTilesetChanges( ) const {
+        for( const auto& [ _, bank ] : _model.m_fsdata.m_mapBanks ) {
+            if( bank.getStatus( ) == STATUS_NEW || bank.getStatus( ) == STATUS_EDITED_UNSAVED ) {
+                return true;
+            }
+        }
+        return _model.tileStatus( ) == STATUS_NEW || _model.tileStatus( ) == STATUS_EDITED_UNSAVED;
+    }
+
+    bool root::runFsdataBuild( bool p_skipWarning ) {
+        if( _model.m_fsdata.m_fsrootPath.empty( ) ) { return false; }
+        if( !p_skipWarning && hasUnsavedMapOrTilesetChanges( ) ) {
+            auto dialog = new Gtk::MessageDialog( *this, "Unsaved map/tileset edits detected.",
+                                                  false, Gtk::MessageType::WARNING,
+                                                  Gtk::ButtonsType::NONE, true );
+            dialog->set_secondary_text(
+                "Building fsdata does not save map/tileset edits made in Sachi. Continue "
+                "building?" );
+            dialog->signal_response( ).connect( [ this, dialog ]( int p_responseId ) {
+                if( p_responseId == Gtk::ResponseType::OK ) { runFsdataBuild( true ); }
+                delete dialog;
+            } );
+            dialog->add_button( "_Cancel", Gtk::ResponseType::CANCEL );
+            dialog->add_button( "_Build", Gtk::ResponseType::OK );
+            dialog->show( );
+            return false;
+        }
+
+        auto fsrootPath = fs::path( _model.m_fsdata.m_fsrootPath );
+        auto pneoRoot
+            = fsrootPath.filename( ) == "FSROOT" ? fsrootPath.parent_path( ) : fsrootPath;
+        auto fsdataPath = pneoRoot / "tools" / "fsdata";
+
+        if( !fs::exists( fsdataPath ) || !fs::is_directory( fsdataPath ) ) {
+            auto dialog = new Gtk::MessageDialog( *this, "Could not find tools/fsdata.", false,
+                                                  Gtk::MessageType::ERROR,
+                                                  Gtk::ButtonsType::OK, true );
+            dialog->set_secondary_text( "Expected path: " + fsdataPath.string( ) );
+            dialog->signal_response( ).connect( [ dialog ]( int ) { delete dialog; } );
+            dialog->show( );
+            return false;
+        }
+
+        auto escapedPath = fsdataPath.string( );
+        for( size_t i = 0; i < escapedPath.size( ); ++i ) {
+            if( escapedPath[ i ] == '"' ) { escapedPath.insert( i++, "\\" ); }
+        }
+        auto command = "make -C \"" + escapedPath + "\"";
+        auto result  = std::system( command.c_str( ) );
+        if( result != 0 ) {
+            auto dialog = new Gtk::MessageDialog( *this, "fsdata build failed.", false,
+                                                  Gtk::MessageType::ERROR,
+                                                  Gtk::ButtonsType::OK, true );
+            dialog->set_secondary_text( "Command: " + command );
+            dialog->signal_response( ).connect( [ dialog ]( int ) { delete dialog; } );
+            dialog->show( );
+            return false;
+        }
+        return true;
     }
 
     void root::onFolderDialogResponse( int p_responseId, Gtk::FileChooserDialog* p_dialog ) {

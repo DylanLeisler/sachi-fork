@@ -208,6 +208,30 @@ namespace UI {
                 _editTrainer->unselect( );
             }
         }
+        if( _editPkmnData ) {
+            _editPkmnData->redraw( );
+            if( _context == CONTEXT_PKMN_DATA_EDITOR ) {
+                _editPkmnData->select( );
+            } else {
+                _editPkmnData->unselect( );
+            }
+        }
+        if( _editItemData ) {
+            _editItemData->redraw( );
+            if( _context == CONTEXT_ITEM_DATA_EDITOR ) {
+                _editItemData->select( );
+            } else {
+                _editItemData->unselect( );
+            }
+        }
+        if( _editMoveData ) {
+            _editMoveData->redraw( );
+            if( _context == CONTEXT_MOVE_DATA_EDITOR ) {
+                _editMoveData->select( );
+            } else {
+                _editMoveData->unselect( );
+            }
+        }
     }
 
     void sideBar::reinit( ) {
