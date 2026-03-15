@@ -1,4 +1,5 @@
 #include <gtkmm/image.h>
+#include "../pure/util.h"
 #include "mapBank.h"
 
 namespace UI {
@@ -44,6 +45,7 @@ namespace UI {
         _mapYEntry.set_width_chars( 2 );
         _mapYEntry.set_max_width_chars( 2 );
         _mapYEntry.set_numeric( true );
+        disableSpinButtonScroll( _mapYEntry );
 
         _entryBox.append( box3 );
         mainBox.append( _entryBox );
@@ -74,6 +76,7 @@ namespace UI {
         _mapXEntry.set_width_chars( 2 );
         _mapXEntry.set_max_width_chars( 2 );
         _mapXEntry.set_numeric( true );
+        disableSpinButtonScroll( _mapXEntry );
 
         _entryBox.append( box4 );
     }
@@ -106,6 +109,7 @@ namespace UI {
         _nameEntry.set_width_chars( 2 );
         _nameEntry.set_max_width_chars( 2 );
         _nameEntry.set_numeric( true );
+        disableSpinButtonScroll( _nameEntry );
 
         _entryBox.insert_child_at_start( box1 );
         setStatus( STATUS_NEW );

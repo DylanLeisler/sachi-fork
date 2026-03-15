@@ -58,11 +58,13 @@ namespace UI::TED {
         _setting1.set_margin_start( MARGIN );
         _setting1.set_width_chars( 1 );
         _setting1.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _setting1 );
 
         _setting2 = Gtk::SpinButton( abSAdjBO2 );
         _setting2.set_margin_start( MARGIN );
         _setting2.set_width_chars( 1 );
         _setting2.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _setting2 );
         _setting2.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tseScale = _setting2.get_value_as_int( );
             _rootWindow.redraw( );
@@ -74,6 +76,7 @@ namespace UI::TED {
         _setting3.set_wrap( );
         _setting3.set_width_chars( 1 );
         _setting3.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _setting3 );
         _setting3.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tseDayTime = _setting3.get_value_as_int( );
             _rootWindow.redraw( );
@@ -84,6 +87,7 @@ namespace UI::TED {
         _setting4.set_margin_start( MARGIN );
         _setting4.set_width_chars( 1 );
         _setting4.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _setting4 );
         _setting4.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tseBlockSetWidth = _setting4.get_value_as_int( );
             _rootWindow.redraw( );
@@ -94,6 +98,7 @@ namespace UI::TED {
         _setting5.set_margin_start( MARGIN );
         _setting5.set_width_chars( 1 );
         _setting5.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _setting5 );
         _setting5.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tseTileSetWidth = _setting5.get_value_as_int( );
             _rootWindow.redraw( );

@@ -1,5 +1,6 @@
 #include <gtkmm/image.h>
 #include "itemSelector.h"
+#include "util.h"
 
 namespace UI {
     itemSelector::itemSelector( model& p_model, Gtk::Orientation p_orientation )
@@ -26,6 +27,7 @@ namespace UI {
         selBox.set_valign( Gtk::Align::CENTER );
 
         selBox.append( _itemIdx );
+        disableSpinButtonScroll( _itemIdx );
         _itemChooser = std::make_shared<stringCacheDropDown>( );
         if( _itemChooser ) { selBox.append( *_itemChooser ); }
         selBox.get_style_context( )->add_class( "linked" );

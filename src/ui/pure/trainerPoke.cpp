@@ -5,6 +5,7 @@
 #include <gtkmm/separator.h>
 
 #include "trainerPoke.h"
+#include "util.h"
 
 namespace UI {
     const std::vector<std::string> NATURES = {
@@ -43,6 +44,7 @@ namespace UI {
         Gtk::Label     ll{ "Level" };
         lcbox.set_start_widget( ll );
         lcbox.set_end_widget( _levelE );
+        disableSpinButtonScroll( _levelE );
         box2l.append( lcbox );
 
         // Ability
@@ -158,6 +160,7 @@ namespace UI {
             ivi.set_max_width_chars( 3 );
             ivi.get_style_context( )->add_class( "no-padding" );
             ivi.set_orientation( Gtk::Orientation::VERTICAL );
+            disableSpinButtonScroll( ivi );
 
             _ivE.push_back( std::move( ivi ) );
             evgrid.attach( _ivE.back( ), i + 1, 1 );
@@ -178,6 +181,7 @@ namespace UI {
             evi.set_max_width_chars( 3 );
             evi.get_style_context( )->add_class( "no-padding" );
             evi.set_orientation( Gtk::Orientation::VERTICAL );
+            disableSpinButtonScroll( evi );
 
             _evE.push_back( std::move( evi ) );
             evgrid.attach( _evE.back( ), i + 1, 2 );

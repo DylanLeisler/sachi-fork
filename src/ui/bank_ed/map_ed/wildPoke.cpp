@@ -2,6 +2,7 @@
 #include <vector>
 
 #include <gtkmm/centerbox.h>
+#include "../../pure/util.h"
 #include "../../root.h"
 #include "wildPoke.h"
 
@@ -60,6 +61,8 @@ namespace UI::MED {
 
         _encBox.append( ercb );
         _encBox.append( rbcb );
+        disableSpinButtonScroll( _encRate );
+        disableSpinButtonScroll( _reqBadges );
 
         std::vector<std::string> wtn{ };
         for( u8 t{ DATA::wildPkmnType::_TP_FIRST }; t <= DATA::wildPkmnType::_TP_LAST; ++t ) {

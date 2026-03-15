@@ -4,6 +4,7 @@
 #include <gtkmm/overlay.h>
 #include <gtkmm/scrolledwindow.h>
 #include "battleBG.h"
+#include "util.h"
 
 namespace UI {
     battleBG::battleBG( const std::string& p_name )
@@ -60,6 +61,7 @@ namespace UI {
         _bgE.set_width_chars( 2 );
         _bgE.set_max_width_chars( 2 );
         _bgE.set_numeric( true );
+        disableSpinButtonScroll( _bgE );
 
         auto p1l = Gtk::Label{ "Play. Plat" };
         p1l.set_margin_end( MARGIN );
@@ -68,6 +70,7 @@ namespace UI {
         _p1E.set_width_chars( 2 );
         _p1E.set_max_width_chars( 2 );
         _p1E.set_numeric( true );
+        disableSpinButtonScroll( _p1E );
 
         auto p2l = Gtk::Label{ "Opp. Plat" };
         p2l.set_margin_end( MARGIN );
@@ -77,6 +80,7 @@ namespace UI {
         _p2E.set_width_chars( 2 );
         _p2E.set_max_width_chars( 2 );
         _p2E.set_numeric( true );
+        disableSpinButtonScroll( _p2E );
 
         _p3l = Gtk::Label{ "Opp. Spr." };
         _p3l.set_margin_start( MARGIN );
@@ -87,6 +91,7 @@ namespace UI {
         _spriteE.set_margin_top( MARGIN );
         _spriteE.set_max_width_chars( 3 );
         _spriteE.set_numeric( true );
+        disableSpinButtonScroll( _spriteE );
         _p3l.hide( );
         _spriteE.hide( );
     }

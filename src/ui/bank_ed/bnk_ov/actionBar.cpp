@@ -37,11 +37,13 @@ namespace UI::BOV {
         _mapBankOverviewSettings1.set_margin_start( MARGIN );
         _mapBankOverviewSettings1.set_width_chars( 1 );
         _mapBankOverviewSettings1.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapBankOverviewSettings1 );
 
         _mapBankOverviewSettings2 = Gtk::SpinButton( abSAdjBO2 );
         _mapBankOverviewSettings2.set_margin_start( MARGIN );
         _mapBankOverviewSettings2.set_width_chars( 1 );
         _mapBankOverviewSettings2.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapBankOverviewSettings2 );
         _mapBankOverviewSettings2.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_bankOverviewScale = _mapBankOverviewSettings2.get_value_as_int( );
             _rootWindow.redraw( );
@@ -53,6 +55,7 @@ namespace UI::BOV {
         _mapBankOverviewSettings3.set_wrap( );
         _mapBankOverviewSettings3.set_width_chars( 1 );
         _mapBankOverviewSettings3.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapBankOverviewSettings3 );
         _mapBankOverviewSettings3.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_bankOverviewDayTime = _mapBankOverviewSettings3.get_value_as_int( );
             _model.m_settings.m_overviewNeedsRedraw = true;

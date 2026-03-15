@@ -54,11 +54,13 @@ namespace UI::MED {
         _mapEditorSettings1.set_margin_start( MARGIN );
         _mapEditorSettings1.set_width_chars( 1 );
         _mapEditorSettings1.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings1 );
 
         _mapEditorSettings2 = Gtk::SpinButton( abSAdj2 );
         _mapEditorSettings2.set_margin_start( MARGIN );
         _mapEditorSettings2.set_width_chars( 1 );
         _mapEditorSettings2.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings2 );
         _mapEditorSettings2.signal_value_changed( ).connect( [ & ]( ) {
             auto value                     = _mapEditorSettings2.get_value_as_int( );
             _model.m_settings.m_blockScale = value;
@@ -71,6 +73,7 @@ namespace UI::MED {
         _mapEditorSettings3.set_wrap( );
         _mapEditorSettings3.set_width_chars( 1 );
         _mapEditorSettings3.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings3 );
         _mapEditorSettings3.signal_value_changed( ).connect( [ & ]( ) {
             auto value                         = _mapEditorSettings3.get_value_as_int( );
             _model.m_settings.m_currentDayTime = value;
@@ -153,6 +156,7 @@ namespace UI::MED {
         _mapEditorSettings4.set_margin_start( MARGIN );
         _mapEditorSettings4.set_width_chars( 1 );
         _mapEditorSettings4.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings4 );
         _mapEditorSettings4.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_blockSetWidth = _mapEditorSettings4.get_value_as_int( );
             _rootWindow.redraw( );
@@ -163,6 +167,7 @@ namespace UI::MED {
         _mapEditorSettings5.set_margin_start( MARGIN );
         _mapEditorSettings5.set_width_chars( 1 );
         _mapEditorSettings5.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings5 );
         _mapEditorSettings5.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_adjacentBlocks = _mapEditorSettings5.get_value_as_int( );
             _rootWindow.redraw( );
@@ -173,6 +178,7 @@ namespace UI::MED {
         _mapEditorSettings6.set_margin_start( MARGIN );
         _mapEditorSettings6.set_width_chars( 1 );
         _mapEditorSettings6.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings6 );
 
         _mapEditorSettings6.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_neighborSpacing = _mapEditorSettings6.get_value_as_int( );
@@ -184,6 +190,7 @@ namespace UI::MED {
         _mapEditorSettings7.set_margin_start( MARGIN );
         _mapEditorSettings7.set_width_chars( 1 );
         _mapEditorSettings7.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings7 );
         _mapEditorSettings7.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tileBrushWidth = _mapEditorSettings7.get_value_as_int( );
             _rootWindow.redraw( );
@@ -194,6 +201,7 @@ namespace UI::MED {
         _mapEditorSettings8.set_margin_start( MARGIN / 2 );
         _mapEditorSettings8.set_width_chars( 1 );
         _mapEditorSettings8.set_max_width_chars( 1 );
+        disableSpinButtonScroll( _mapEditorSettings8 );
         _mapEditorSettings8.signal_value_changed( ).connect( [ & ]( ) {
             _model.m_settings.m_tileBrushHeight = _mapEditorSettings8.get_value_as_int( );
             _rootWindow.redraw( );

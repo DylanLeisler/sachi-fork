@@ -205,6 +205,7 @@ namespace UI {
                 bx5.set_start_widget( shbox1l );
 
                 bx5.set_end_widget( _shiftYE );
+                disableSpinButtonScroll( _shiftYE );
                 _shiftYE.signal_changed( ).connect( [ this ]( ) {
                     if( _model.selectedBank( ) == -1
                         || _shiftYE.get_value( ) == _model.bank( ).m_mapImageShiftY ) {
@@ -232,6 +233,7 @@ namespace UI {
                 bx5.set_start_widget( shbox1l );
 
                 bx5.set_end_widget( _shiftXE );
+                disableSpinButtonScroll( _shiftXE );
                 _shiftXE.signal_changed( ).connect( [ this ]( ) {
                     if( _model.selectedBank( ) == -1
                         || _shiftXE.get_value( ) == _model.bank( ).m_mapImageShiftX ) {
@@ -321,6 +323,7 @@ namespace UI {
                 bx5.set_start_widget( shbox1l );
 
                 bx5.set_end_widget( _wpshiftYE );
+                disableSpinButtonScroll( _wpshiftYE );
                 _wpshiftYE.signal_changed( ).connect( [ this ]( ) {
                     if( _model.selectedBank( ) == -1
                         || _wpshiftYE.get_value( ) == _model.bank( ).m_wildPokeMapShiftY ) {
@@ -347,6 +350,7 @@ namespace UI {
                 bx5.set_start_widget( shbox1l );
 
                 bx5.set_end_widget( _wpshiftXE );
+                disableSpinButtonScroll( _wpshiftXE );
                 _wpshiftXE.signal_changed( ).connect( [ this ]( ) {
                     if( _model.selectedBank( ) == -1
                         || _wpshiftXE.get_value( ) == _model.bank( ).m_wildPokeMapShiftX ) {

@@ -1,5 +1,6 @@
 #include <gtkmm/image.h>
 #include "pokeSelector.h"
+#include "util.h"
 
 namespace UI {
     pokeSelector::pokeSelector( model& p_model, bool p_enhanced )
@@ -20,8 +21,10 @@ namespace UI {
         Gtk::Box numBox{ Gtk::Orientation::HORIZONTAL };
         numBox.append( _pkmnIdx );
         _pkmnIdx.set_hexpand( );
+        disableSpinButtonScroll( _pkmnIdx );
         numBox.append( _pkmnForme );
         _pkmnForme.set_hexpand( );
+        disableSpinButtonScroll( _pkmnForme );
         numBox.get_style_context( )->add_class( "linked" );
         selBox.append( numBox );
 

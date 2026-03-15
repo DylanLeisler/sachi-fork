@@ -3,6 +3,7 @@
 #include <gtkmm/scrolledwindow.h>
 
 #include "dropDown.h"
+#include "util.h"
 
 namespace UI {
     dropDown::dropDown( const std::vector<std::string>& p_choices, u64 p_defaultChoice )
@@ -145,6 +146,7 @@ namespace UI {
 
         _dropDown.set_expand( true );
         _idxE.set_expand( true );
+        disableSpinButtonScroll( _idxE );
 
         _mainBox.append( _idxE );
         _mainBox.append( _dropDown );

@@ -1,5 +1,6 @@
 #include <gtkmm/image.h>
 #include "owSpriteSelector.h"
+#include "util.h"
 
 namespace UI {
     owSpriteSelector::owSpriteSelector( model& p_model, bool p_allowFrameEdit )
@@ -22,6 +23,8 @@ namespace UI {
 
         selBox.append( _owIdx );
         selBox.append( _frameIdx );
+        disableSpinButtonScroll( _owIdx );
+        disableSpinButtonScroll( _frameIdx );
         _frameIdx.set_visible( p_allowFrameEdit );
         selBox.get_style_context( )->add_class( "linked" );
 

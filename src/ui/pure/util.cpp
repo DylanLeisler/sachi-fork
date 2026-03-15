@@ -1,5 +1,6 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/eventcontrollerscroll.h>
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 
@@ -7,6 +8,37 @@
 #include "util.h"
 
 namespace UI {
+    namespace {
+        constexpr const char* SPIN_SCROLL_DISABLED_KEY = "sachi-spin-scroll-disabled";
+    }
+
+    void disableSpinButtonScroll( Gtk::SpinButton& p_spinButton ) {
+        if( g_object_get_data( G_OBJECT( p_spinButton.gobj( ) ), SPIN_SCROLL_DISABLED_KEY ) ) {
+            return;
+        }
+
+        auto scrollController = Gtk::EventControllerScroll::create( );
+        scrollController->set_flags( Gtk::EventControllerScroll::Flags::VERTICAL
+                                     | Gtk::EventControllerScroll::Flags::HORIZONTAL
+                                     | Gtk::EventControllerScroll::Flags::DISCRETE );
+        scrollController->signal_scroll( ).connect( []( double, double ) { return true; }, false );
+        p_spinButton.add_controller( scrollController );
+
+        g_object_set_data( G_OBJECT( p_spinButton.gobj( ) ), SPIN_SCROLL_DISABLED_KEY,
+                           reinterpret_cast<void*>( 1 ) );
+    }
+
+    void disableSpinButtonScrollRecursive( Gtk::Widget& p_widget ) {
+        if( auto spinButton = dynamic_cast<Gtk::SpinButton*>( &p_widget ) ) {
+            disableSpinButtonScroll( *spinButton );
+        }
+
+        for( auto child = p_widget.get_first_child( ); child;
+             child      = child->get_next_sibling( ) ) {
+            disableSpinButtonScrollRecursive( *child );
+        }
+    }
+
     std::shared_ptr<Gtk::Button> createButton( const std::string&     p_iconName,
                                                const std::string&     p_labelText,
                                                std::function<void( )> p_callback ) {

@@ -2,6 +2,7 @@
 #include <gtkmm/label.h>
 
 #include "mapPosition.h"
+#include "util.h"
 
 namespace UI {
     mapPosition::mapPosition( bool p_allowSliceEdit )
@@ -81,5 +82,6 @@ namespace UI {
         }
 
         setDisplayMode( displayMode::LOCAL_POSITION );
+        disableSpinButtonScrollRecursive( _mainBox );
     }
 } // namespace UI

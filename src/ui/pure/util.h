@@ -6,11 +6,23 @@
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/button.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/widget.h>
 
 #include "../../data/maprender.h"
 #include "../../defines.h"
 
 namespace UI {
+    /*
+     * @brief: Disable mouse-wheel/trackpad scrolling from changing spinbutton values.
+     */
+    void disableSpinButtonScroll( Gtk::SpinButton& p_spinButton );
+
+    /*
+     * @brief: Recursively disable scroll-driven changes for all spinbuttons in a widget tree.
+     */
+    void disableSpinButtonScrollRecursive( Gtk::Widget& p_widget );
+
     /*
      * @brief: Creates a new Gtk::Button with an icon and a string and the given
      * handler for the clicked signal.

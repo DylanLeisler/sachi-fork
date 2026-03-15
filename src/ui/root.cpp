@@ -86,6 +86,8 @@ namespace UI {
 
             _sb1 = Gtk::SpinButton{ sba1 };
             _sb2 = Gtk::SpinButton{ sba2 };
+            disableSpinButtonScroll( _sb1 );
+            disableSpinButtonScroll( _sb2 );
 
             posbox.set_margin( MARGIN );
             posbox.append( poslabel );

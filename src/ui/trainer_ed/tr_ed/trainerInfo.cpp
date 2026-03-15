@@ -4,6 +4,7 @@
 #include <gtkmm/separator.h>
 
 #include "../../root.h"
+#include "../../pure/util.h"
 #include "trainerInfo.h"
 
 namespace UI::TRE {
@@ -55,6 +56,7 @@ namespace UI::TRE {
         tmoneybox.set_end_widget( _moneyE );
         leftBox.append( tmoneybox );
         _moneyE.set_numeric( true );
+        disableSpinButtonScroll( _moneyE );
         _money->signal_value_changed( ).connect( [ this ]( ) {
             if( _lock ) { return; }
             _model.selectedTrainer( ).m_moneyMultiplier = _moneyE.get_value( );
@@ -71,6 +73,7 @@ namespace UI::TRE {
         taibox.set_end_widget( _aiE );
         leftBox.append( taibox );
         _aiE.set_numeric( true );
+        disableSpinButtonScroll( _aiE );
         _ai->signal_value_changed( ).connect( [ this ]( ) {
             if( _lock ) { return; }
             _model.selectedTrainer( ).m_AILevel = _aiE.get_value( );

@@ -1098,6 +1098,8 @@ namespace UI::MED {
             fbox.set_hexpand( false );
             _detailFrames.push_back( std::move( frame ) );
         }
+
+        disableSpinButtonScrollRecursive( _mainFrame );
     }
 
     void eventSelector::redraw( ) {
