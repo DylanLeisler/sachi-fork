@@ -161,6 +161,8 @@ namespace UI {
 
         void editItemData( u16 p_dataId );
 
+        void ensureDataEditorWindowSize( );
+
         /*
          * @brief: Handler for the "Open FSROOT" button.
          */

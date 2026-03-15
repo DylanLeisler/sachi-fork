@@ -14,6 +14,11 @@
 #include "root.h"
 
 namespace UI {
+    namespace {
+        constexpr int DATA_EDITOR_MIN_WIDTH  = 1400;
+        constexpr int DATA_EDITOR_MIN_HEIGHT = 900;
+    }
+
     namespace fs = std::filesystem;
 
     void root::initActions( ) {
@@ -922,6 +927,7 @@ namespace UI {
 
         _model.m_settings.m_pkmnDataEId = p_dataId;
 
+        ensureDataEditorWindowSize( );
         switchContext( CONTEXT_PKMN_DATA_EDITOR );
         redraw( );
     }
@@ -950,6 +956,7 @@ namespace UI {
 
         _model.m_settings.m_itemDataEId = p_dataId;
 
+        ensureDataEditorWindowSize( );
         switchContext( CONTEXT_ITEM_DATA_EDITOR );
         redraw( );
     }
@@ -978,8 +985,18 @@ namespace UI {
 
         _model.m_settings.m_moveDataEId = p_dataId;
 
+        ensureDataEditorWindowSize( );
         switchContext( CONTEXT_MOVE_DATA_EDITOR );
         redraw( );
+    }
+
+    void root::ensureDataEditorWindowSize( ) {
+        int width  = 0;
+        int height = 0;
+        get_default_size( width, height );
+        if( width < DATA_EDITOR_MIN_WIDTH || height < DATA_EDITOR_MIN_HEIGHT ) {
+            set_default_size( DATA_EDITOR_MIN_WIDTH, DATA_EDITOR_MIN_HEIGHT );
+        }
     }
 
     void root::editTileSets( u8 p_ts1, u8 p_ts2 ) {
