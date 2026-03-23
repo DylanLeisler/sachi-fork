@@ -29,6 +29,7 @@ namespace UI {
         _openMenu->append( "Reload Map Bank", "load.reloadmapbank" );
         _openMenu->append( "Import Map", "load.importmap" );
         _openMenu->append( "Import Large Map", "load.importlargemap" );
+        _openMenu->append( "Swap Map Segment", "load.swapmap" );
 
         _saveMenu->append( "Save Single Map", "save.map" );
         _saveMenu->append( "Save Single Mapbank", "save.mapbank" );

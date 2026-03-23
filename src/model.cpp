@@ -319,6 +319,29 @@ bool model::readLargeMap( u16 p_bank, u8 p_mapX, u8 p_mapY, u8 p_insertX, u8 p_i
     return true;
 }
 
+bool model::swapMapSegments( u16 p_bank, u8 p_mapX1, u8 p_mapY1, u8 p_mapX2, u8 p_mapY2 ) {
+    if( !existsBank( p_bank ) ) { return false; }
+
+    auto& bnk = bank( p_bank );
+    if( !bnk.m_loaded ) { return false; }
+
+    if( p_mapX1 > bnk.getSizeX( ) || p_mapY1 > bnk.getSizeY( ) || p_mapX2 > bnk.getSizeX( )
+        || p_mapY2 > bnk.getSizeY( ) ) {
+        return false;
+    }
+
+    if( p_mapX1 == p_mapX2 && p_mapY1 == p_mapY2 ) { return true; }
+
+    std::swap( bnk.m_bank.m_slices[ p_mapY1 ][ p_mapX1 ], bnk.m_bank.m_slices[ p_mapY2 ][ p_mapX2 ] );
+    std::swap( bnk.m_bank.m_mapData[ p_mapY1 ][ p_mapX1 ],
+               bnk.m_bank.m_mapData[ p_mapY2 ][ p_mapX2 ] );
+    std::swap( bnk.m_computedBank[ p_mapY1 ][ p_mapX1 ], bnk.m_computedBank[ p_mapY2 ][ p_mapX2 ] );
+
+    m_settings.m_overviewNeedsRedraw = true;
+    markBankChanged( p_bank );
+    return true;
+}
+
 bool model::checkOrLoadBank( int p_bank, bool p_forceRead ) {
     if( p_bank > DIVE_MAP && p_bank <= DIVE_MAP + MAX_MAPBANK_NAME ) {
         if( !existsBank( p_bank % DIVE_MAP ) ) { return false; }

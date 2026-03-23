@@ -54,6 +54,7 @@ int main( int p_argc, char* p_argv[] ) {
     app->set_accel_for_action( "load.reloadmapbank", "<Primary><Shift>r" );
     app->set_accel_for_action( "load.importmap", "<Primary>m" );
     app->set_accel_for_action( "load.importlargemap", "<Primary><Shift>m" );
+    app->set_accel_for_action( "load.swapmap", "<Primary><Shift>w" );
     app->set_accel_for_action( "load.importblocks1", "<Primary>b" );
     app->set_accel_for_action( "load.importblocks2", "<Primary><Shift>b" );
     app->set_accel_for_action( "load.importtiles1", "<Primary>t" );

@@ -137,6 +137,64 @@ namespace UI {
             dialog->add_button( "_Select", Gtk::ResponseType::OK );
             dialog->show( );
         } );
+        _loadSwapmapAction       = _loadActions->add_action( "swapmap", [ this ]( ) {
+            if( _model.selectedBank( ) == -1 ) { return; }
+
+            auto dialog = new Gtk::Dialog( "Swap Map Segment", true );
+            dialog->set_transient_for( *this );
+            dialog->set_modal( true );
+
+            auto content = dialog->get_content_area( );
+            content->set_margin( MARGIN );
+            content->set_spacing( MARGIN );
+
+            auto currentLabel = Gtk::Label(
+                "Current segment: (" + std::to_string( _model.selectedMapX( ) ) + ", "
+                + std::to_string( _model.selectedMapY( ) ) + ")" );
+            currentLabel.set_halign( Gtk::Align::START );
+            content->append( currentLabel );
+
+            auto targetRow = Gtk::Box( Gtk::Orientation::HORIZONTAL );
+            targetRow.set_spacing( MARGIN );
+            auto targetLabel = Gtk::Label( "Swap with (x, y):" );
+            targetLabel.set_halign( Gtk::Align::START );
+            targetRow.append( targetLabel );
+
+            auto xAdj = Gtk::Adjustment::create( _model.selectedMapX( ), 0.0, _model.selectedSizeX( ),
+                                                 1.0, 1.0, 0.0 );
+            auto yAdj = Gtk::Adjustment::create( _model.selectedMapY( ), 0.0, _model.selectedSizeY( ),
+                                                 1.0, 1.0, 0.0 );
+
+            _sb1 = Gtk::SpinButton{ xAdj };
+            _sb2 = Gtk::SpinButton{ yAdj };
+            _sb1.set_numeric( true );
+            _sb2.set_numeric( true );
+            _sb1.set_width_chars( 3 );
+            _sb2.set_width_chars( 3 );
+            disableSpinButtonScroll( _sb1 );
+            disableSpinButtonScroll( _sb2 );
+
+            auto spinBox = Gtk::Box( Gtk::Orientation::HORIZONTAL );
+            spinBox.get_style_context( )->add_class( "linked" );
+            spinBox.append( _sb1 );
+            spinBox.append( _sb2 );
+            targetRow.append( spinBox );
+            content->append( targetRow );
+
+            dialog->add_button( "_Cancel", Gtk::ResponseType::CANCEL );
+            dialog->add_button( "_Swap", Gtk::ResponseType::OK );
+            dialog->signal_response( ).connect( [ this, dialog ]( int p_responseId ) {
+                if( p_responseId == Gtk::ResponseType::OK ) {
+                    auto targetX = _sb1.get_value_as_int( );
+                    auto targetY = _sb2.get_value_as_int( );
+                    _model.swapMapSegments( _model.selectedBank( ), _model.selectedMapX( ),
+                                            _model.selectedMapY( ), targetX, targetY );
+                    redraw( );
+                }
+                delete dialog;
+            } );
+            dialog->show( );
+        } );
 
         _loadImportblocks1Action = _loadActions->add_action( "importblocks1", [ & ]( ) {
             auto dialog = new Gtk::FileChooserDialog( "Choose a block set to import as block set 1",
@@ -639,6 +697,7 @@ namespace UI {
         _loadReloadmapbankAction->set_enabled( false );
         _loadImportmapAction->set_enabled( false );
         _loadImportlargemapAction->set_enabled( false );
+        _loadSwapmapAction->set_enabled( false );
         _saveFsrootAction->set_enabled( false );
         _saveMapAction->set_enabled( false );
         _saveMapbankAction->set_enabled( false );
@@ -693,6 +752,7 @@ namespace UI {
             _loadReloadmapbankAction->set_enabled( true );
             _loadImportmapAction->set_enabled( true );
             _loadImportlargemapAction->set_enabled( true );
+            _loadSwapmapAction->set_enabled( true );
             _saveFsrootAction->set_enabled( true );
             _saveMapAction->set_enabled( true );
             _saveExportmapAction->set_enabled( true );

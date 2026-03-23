@@ -28,6 +28,7 @@ namespace UI {
         std::shared_ptr<Gio::SimpleAction>      _loadReloadmapbankAction;
         std::shared_ptr<Gio::SimpleAction>      _loadImportmapAction;
         std::shared_ptr<Gio::SimpleAction>      _loadImportlargemapAction;
+        std::shared_ptr<Gio::SimpleAction>      _loadSwapmapAction;
         std::shared_ptr<Gio::SimpleAction>      _loadImportblocks1Action;
         std::shared_ptr<Gio::SimpleAction>      _loadImportblocks2Action;
         std::shared_ptr<Gio::SimpleAction>      _loadImporttiles1Action;

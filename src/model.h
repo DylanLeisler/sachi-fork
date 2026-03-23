@@ -677,6 +677,11 @@ struct model {
                        std::string p_path );
 
     /*
+     * @brief: Swaps two map segments (slice + map data + computed cache) within one bank.
+     */
+    bool swapMapSegments( u16 p_bank, u8 p_mapX1, u8 p_mapY1, u8 p_mapX2, u8 p_mapY2 );
+
+    /*
      * @brief: Reads all map slices of the specified map bank from the FS.
      * @param p_forceReread: If true, ignores and overwrites any previously read data.
      */
