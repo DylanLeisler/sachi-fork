@@ -972,7 +972,20 @@ namespace UI::MED {
                         }
                     }
                 } else if( _currentMapDisplayMode == mapEditor::MODE_EDIT_MOVEMENT ) {
-                    if( _blockStamp && _blockStamp->isValid( ) ) {
+                    if( _model.m_settings.m_movementBucketMode ) {
+                        const u16 targetBlockidx = block.m_blockidx;
+                        const u8  targetMovement
+                            = _model.m_settings.m_currentlySelectedBlock.m_movedata;
+                        for( u16 by{ 0 }; by < DATA::SIZE; ++by ) {
+                            for( u16 bx{ 0 }; bx < DATA::SIZE; ++bx ) {
+                                auto& curBlock = mp.m_data.m_blocks[ by ][ bx ];
+                                if( curBlock.m_blockidx != targetBlockidx ) { continue; }
+                                curBlock.m_movedata = targetMovement;
+                                _currentMap[ p_mapX + 1 ][ p_mapY + 1 ].updateBlockMovement(
+                                    targetMovement, bx, by );
+                            }
+                        }
+                    } else if( _blockStamp && _blockStamp->isValid( ) ) {
                         // paste the block stamp
                         auto bx{ p_blockX + xcorr }, by{ p_blockY + ycorr };
                         for( size_t y{ 0 }; y < _blockStamp->sizeY( ); ++y ) {

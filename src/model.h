@@ -377,6 +377,7 @@ struct model {
         u8   m_tileBrushWidth  = 1;
         u8   m_tileBrushHeight = 1;
         bool m_tileBrushPatternMode = false;
+        bool m_movementBucketMode   = false;
 
         u8   m_bankOverviewScale   = 3;
         u8   m_bankOverviewSpacing = 2;

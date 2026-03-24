@@ -1,4 +1,7 @@
 #include "movementSelector.h"
+#include <gdkmm/texture.h>
+#include <gtkmm/image.h>
+#include "../../../defines.h"
 #include "../../root.h"
 
 namespace UI::MED {
@@ -23,11 +26,38 @@ namespace UI::MED {
             _rootWindow.redraw( );
         } );
 
+        _bucketToggle.set_tooltip_text(
+            "Bucket mode: set movement for every instance of the clicked tile in this segment." );
+        _bucketToggle.set_active( _model.m_settings.m_movementBucketMode );
+        _bucketToggle.set_has_frame( true );
+        _bucketToggle.get_style_context( )->add_class( "no-padding" );
+        _bucketToggle.signal_toggled( ).connect( [ this ]( ) {
+            _model.m_settings.m_movementBucketMode = _bucketToggle.get_active( );
+            _bucketToggle.grab_focus( );
+        } );
+
+        auto icon = Gtk::Image( );
+        fs::path bucketIconPath = fs::path( "src" ) / "paint-bucket.svg";
+        if( !fs::exists( bucketIconPath ) ) { bucketIconPath = fs::path( "paint-bucket.svg" ); }
+        if( fs::exists( bucketIconPath ) ) {
+            icon.set( Gdk::Texture::create_from_filename( bucketIconPath.string( ) ) );
+        } else {
+            icon.set_from_icon_name( "color-select-symbolic" );
+        }
+        _bucketToggle.set_child( icon );
+        _bucketToggleRow.set_margin_start( MARGIN );
+        _bucketToggleRow.set_margin_end( MARGIN );
+        _bucketToggleRow.set_margin_top( MARGIN );
+        _bucketToggleRow.set_halign( Gtk::Align::END );
+        _bucketToggleRow.append( _bucketToggle );
+
         meScrolledWindow.set_margin( MARGIN );
         meScrolledWindow.set_vexpand( );
         meScrolledWindow.set_halign( Gtk::Align::CENTER );
         meScrolledWindow.set_policy( Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC );
-        _movementFrame.set_child( meScrolledWindow );
+        _movementBox.append( _bucketToggleRow );
+        _movementBox.append( meScrolledWindow );
+        _movementFrame.set_child( _movementBox );
     }
 
     void movementSelector::updateSelection( ) {
@@ -46,6 +76,7 @@ namespace UI::MED {
             _model.m_settings.m_blockScale > 1 ? _model.m_settings.m_blockScale : 2 );
         _movementWidget.setSpacing( _model.m_settings.m_blockSpacing );
         _movementWidget.queue_resize( );
+        _bucketToggle.set_active( _model.m_settings.m_movementBucketMode );
 
         updateSelection( );
     }
