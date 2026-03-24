@@ -1,6 +1,7 @@
 #pragma once
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/togglebutton.h>
 
@@ -23,7 +24,10 @@ namespace UI::MED {
         Gtk::Box         _movementBox{ Gtk::Orientation::VERTICAL };
         Gtk::Box         _bucketToggleRow{ Gtk::Orientation::HORIZONTAL };
         Gtk::ToggleButton _bucketToggle;
+        std::shared_ptr<Gtk::EventControllerMotion> _movementHoverMotion;
         computedMapSlice _movementWidget;
+
+        static std::string movementTooltipText( u8 p_movement );
 
       public:
         movementSelector( model& p_model, root& p_root );

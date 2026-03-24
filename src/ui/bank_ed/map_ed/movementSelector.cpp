@@ -5,6 +5,32 @@
 #include "../../root.h"
 
 namespace UI::MED {
+    std::string movementSelector::movementTooltipText( u8 p_movement ) {
+        char hexbuf[ 8 ];
+        snprintf( hexbuf, sizeof( hexbuf ), "%02X", p_movement );
+        const std::string hex = std::string( hexbuf );
+
+        switch( p_movement ) {
+        case 0x00: return "0x00: Any/free movement.";
+        case 0x01: return "0x01: Blocked (unpassable).";
+        case 0x04: return "0x04: Surf/water.";
+        case 0x0A: return "0x0A: Sit tile.";
+        case 0x0C: return "0x0C: Walk (ground level).";
+        case 0x3C: return "0x3C: Bridge.";
+        case 0x3F: return "0x3F: Border.";
+        default: break;
+        }
+
+        if( p_movement % 4 == 0 ) {
+            return "0x" + hex
+                   + ": Elevated layer (passable at matching Z level).";
+        }
+        if( p_movement % 4 == 1 ) {
+            return "0x" + hex + ": Blocked.";
+        }
+        return "0x" + hex + ": Special/nonstandard movement.";
+    }
+
     movementSelector::movementSelector( model& p_model, root& p_root )
         : _model{ p_model }, _rootWindow{ p_root } {
         _movementFrame = Gtk::Frame( "Movements" );
@@ -25,6 +51,27 @@ namespace UI::MED {
             _model.updateSelectedBlock( { 0, DATA::mapBlockAtom::MOVEMENT_ORDER[ p_blockY ] } );
             _rootWindow.redraw( );
         } );
+        _movementWidget.set_has_tooltip( true );
+        _movementHoverMotion = Gtk::EventControllerMotion::create( );
+        _movementHoverMotion->signal_motion( ).connect( [ this ]( double, double p_y ) {
+            const u16 scale
+                = _model.m_settings.m_blockScale > 1 ? _model.m_settings.m_blockScale : 2;
+            const u16 blockHeight = scale * DATA::BLOCK_SIZE + _model.m_settings.m_blockSpacing;
+            if( !blockHeight ) { return; }
+
+            const u16 movementIndex = u16( p_y ) / blockHeight;
+            if( movementIndex >= DATA::MAX_MOVEMENTS ) {
+                _movementWidget.set_tooltip_text( "" );
+                return;
+            }
+
+            const u8 movementCode = DATA::mapBlockAtom::MOVEMENT_ORDER[ movementIndex ];
+            _movementWidget.set_tooltip_text( movementTooltipText( movementCode ) );
+        } );
+        _movementHoverMotion->signal_leave( ).connect( [ this ]( ) {
+            _movementWidget.set_tooltip_text( "" );
+        } );
+        _movementWidget.add_controller( _movementHoverMotion );
 
         _bucketToggle.set_tooltip_text(
             "Bucket mode: set movement for every instance of the clicked tile in this segment." );
